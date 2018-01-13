@@ -1,0 +1,49 @@
+{% extends "layout.html.twig" %}
+{% block content %}
+<h1>List</h1>
+{% if items %}
+    <table class="table table-sm table-hover table-bordered">
+          <thead class="thead-inverse">
+          <tr>
+            <th>Status</th>
+            <th>Name</th>
+            <th>Handle</th>
+            <th>URL</th>
+            <th>Co-op participation</th>
+            <th>Membership</th>
+            <th>Comment</th>
+            <th>Country</th>
+            <th><a href="{{ pagination.sortingUrl('ts_started') }}">Date</a></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for it in items %}
+            <tr class="table-{{ it.status_class }}">
+                <td>
+                	{% if it.status is null %}
+                		<a href="/admin/custom.php?invite={{ it.id }}" class="btn btn-success btn-sm">Invite</a>
+                	{% else %}
+                		{{ it.status }}
+                		<a href="/admin/custom.php?invite={{ it.id }}" class="btn btn-danger btn-sm">Re-Create</a>
+                	{% endif %}
+                	<!--{{ it.id }}-->
+                </td>
+                <td><a href="mailto:{{ it.email }}">{{ it.name }}</a></td>
+                <td><a href="https://social.coop/@{{ it.username }}" target="_blank">@{{ it.username }}</a></td>
+                <td><a href="{{ it.site }}" target="_blank">{{ it.site }}</a></td>
+                <td style="white-space: nowrap;">{{ it.coop|raw }}</td>
+                <td>{{ it.fee }}</td>
+                <td>{{ it.comment }}</td>
+                <td>{{ it.country|raw }}</td>
+                <td style="white-space: nowrap;">{{ it.ts_started|date("d F Y H:m")  }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="text-center">
+        {% include 'pagination.twig' %}
+    </div>
+{% else %}
+    <p>No items found.</p>
+{% endif %}
+{% endblock %}

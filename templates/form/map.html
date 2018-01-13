@@ -1,0 +1,96 @@
+
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg==" crossorigin=""></script>
+
+<script src="https://unpkg.com/leaflet-google-places-autocomplete@0.0.8/src/js/leaflet-gplaces-autocomplete.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-google-places-autocomplete@0.0.8/src/css/leaflet-gplaces-autocomplete.css" />
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTQM0OAKfPQP8IYRjEvL8fthq6MIk9Me8&libraries=places"></script>
+
+
+
+<div id="mapid" style="width: 540px; height: 480px;"></div>
+
+<script>
+	
+	function map_mark(e) {
+		
+		locationMark.setLatLng(e.latlng).addTo(mymap);
+		
+		map_mark_store(e.latlng);
+		
+		$('.leaflet-gac-control').val('');
+	}
+
+	function map_mark_store(loc) {
+		//console.log(loc);
+		$(loc_field).val(loc.lat+','+loc.lng);
+	}
+	
+	var mymap = L.map('mapid').fitWorld();
+
+	L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/outdoors-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWF5ZWwiLCJhIjoiY2oybTJwMGV0MDAxcTMzcW5xZng3NGMwaiJ9.76-N3Xrxhp4AkqONtrXjuw', {
+		minZoom: 1,
+		maxZoom: 18,
+		attribution: 'Map data &copy; ' +
+			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a> ' +
+			' <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		id: 'mapbox.streets'
+	}).addTo(mymap);
+
+	var locationMark = L.marker();
+
+	function onMapClick(e) {
+		map_mark(e);
+	}
+
+	mymap.on('click', onMapClick);
+	
+	function onLocationFound(e) {
+		var radius = e.accuracy / 2;
+
+		L.circle(e.latlng, radius).addTo(mymap);
+
+		map_mark(e);
+	}
+
+	function onLocationError(e) {
+		alert(e.message);
+	}
+
+	mymap.on('locationfound', onLocationFound);
+	mymap.on('locationerror', onLocationError);
+
+	mymap.locate({setView: true, maxZoom: 16});
+	
+	new L.Control.GPlaceAutocomplete({
+	    position: "topright",
+	    callback: function(location){
+	        //console.log(location); // object of google place is given 
+	        
+	        var latlng = L.latLng([
+	          location.geometry.location.lat(),
+	          location.geometry.location.lng()
+	          ]);
+	        
+	        mymap.panTo(latlng);
+	        
+			locationMark.setLatLng(latlng).addTo(mymap);
+			
+			map_mark_store(latlng);
+	        
+	        mymap.fitBounds([
+               [location.geometry.viewport.getSouthWest().lat(),
+                location.geometry.viewport.getSouthWest().lng()],
+               [location.geometry.viewport.getNorthEast().lat(),
+                location.geometry.viewport.getNorthEast().lng()]
+              ]);
+	 
+	    }
+	})
+	.addTo(mymap);
+
+</script>
+

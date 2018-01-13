@@ -1,0 +1,33 @@
+{% extends "layout.html.twig" %}
+{% form_theme form 'bootstrap_4_layout.html.twig' %}
+
+{% block content %}
+
+
+<div class="row justify-content-md-center h-100" >
+  <div class="col col-md-6  my-auto">
+
+  	 <h1>{{ title|e }}</h1>
+  	  	<hr/>
+
+
+  	<form action="?" method="post" enctype="multipart/form-data" class="">
+
+  	    {{ form_widget(form) }}
+
+  	    {{ output_code|raw }}
+
+
+      <div class="form-group">
+
+       	 <button type="submit" id="form_save" class="btn-success btn-lg btn">Continue</button>
+       </div>
+
+
+  	</form>
+
+  </div>
+</div>
+
+
+{% endblock %}

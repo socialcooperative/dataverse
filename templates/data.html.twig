@@ -1,0 +1,23 @@
+{% extends "layout.html.twig" %}
+
+{% block content %}
+
+<h1>{{ title|e }}</h1>
+<ul>
+    {% for k,v in data %}
+        <li>
+        {{ k|humanize }}: 
+        
+        {% if v == 1 %}
+        	Yes
+        {% elseif v == false %}
+        	No
+        {% else %}
+       		{{ v|e }}
+        {% endif %}
+        
+        </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

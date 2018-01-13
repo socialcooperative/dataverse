@@ -1,0 +1,67 @@
+<link rel="stylesheet" href="/css/sortable.css" />
+
+
+<ul id="sortable" class="clearfix">
+
+   <?php
+   global $sortable;
+	 // print_r($sortable->choices);
+
+   foreach($sortable->choices as $step=>$choices){
+		 if($sortable->is_tree){
+			 $choice_children = array_slice($choices, 1, null, true);
+			 $choices = array_slice($choices, 0, 1, true);
+		 }
+		 // print_r($choice_parent);
+		 // print_r($choices);
+		 foreach($choices as $key=>$val){
+			 include('sortable_item.html');
+			 ?>
+				<ul>
+				<?php
+					// if(count($choices)>1){
+					foreach($choice_children as $key=>$val){
+						include('sortable_item.html');
+						?>
+		 				<ul>
+		 				</ul>
+		    <?php } ?>
+				</ul>
+   <?php }} ?>
+</ul>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sortable/0.9.13/jquery-sortable-min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+var group = $('#sortable').sortable({
+	axis: 'y',
+	group: 'serialization',
+	delay: 500,
+	// nested: false,
+	onDrop: function ($item, container, _super) {
+
+		var list = group.sortable("serialize").get();
+
+		var data = {};
+		data.sortable = list[0];
+
+		console.log(data);
+
+		var jsonString = JSON.stringify(data, null, ' ');
+
+		// console.log(jsonString);
+
+		$.ajax({
+            data: jsonString,
+            type: 'POST',
+            url: '?'
+        });
+
+		_super($item, container);
+	}
+});
+
+});
+</script>
