@@ -2,22 +2,22 @@
 
 {% block content %}
 
-<h1>{{ title|e }}</h1>
-<ul>
-    {% for k,v in data %}
-        <li>
-        {{ k|humanize }}: 
-        
+  <h1>{{ title|e }}</h1>
+  <ul>
+    {% for k, v in data %}
+      <li>
+        {{ k|humanize }}:
+
         {% if v == 1 %}
-        	Yes
+          Yes
         {% elseif v == false %}
-        	No
+          No
         {% else %}
-       		{{ v|e }}
+          {{ v|e }}
         {% endif %}
-        
-        </li>
+
+      </li>
     {% endfor %}
-</ul>
+  </ul>
 
 {% endblock %}

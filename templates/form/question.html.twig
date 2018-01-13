@@ -1,40 +1,39 @@
 {% extends "layout.html.twig" %}
 
-{% form_theme form with ['dataverse_form_theme.html.twig', _self] %}
+{% form_theme form with['dataverse_form_theme.html.twig', _self] %}
 
-{% block title %}{{title}}{% endblock %}
+{% block title %}{{title}}
+{% endblock %}
 
 {% block content %}
 
-<div class="row justify-content-md-center h-100" >
-  <div class="col col-md-6  my-auto">
+  <div class="row justify-content-md-center h-100">
+    <div class="col col-md-6  my-auto">
 
+      <form action="?step={{current_step}}" method="post" enctype="multipart/form-data" class="">
 
-  	<form action="?step={{current_step}}" method="post" enctype="multipart/form-data" class="">
+        {{ output_before|raw }}
 
-				{{ output_before|raw }}
+        {{ form_widget(form) }}
 
-  	    {{ form_widget(form) }}
+        {{ output_after|raw }}
 
-				{{ output_after|raw }}
+        {% if continue_label and has_more_questions %}
+          <button type="submit" id="form_save" class="btn-success btn-lg btn">{{continue_label}}</button>
+        {% endif %}
 
-			{% if continue_label and has_more_questions %}
-	      	<button type="submit" id="form_save" class="btn-success btn-lg btn">{{continue_label}}</button>
-			{% endif %}
+        <div class="form-group">
+          {% if current_step > 1 %}
+            <a href="?before={{current_step|e}}" onclick="return back_with_fallback(this)" id="back" class="btn-sm btn btn-info">Back</a>
+          {% endif %}
+          {% if current_step and has_more_questions and skip_allowed %}
+            <a href="?after={{current_step|e}}" id="skip" class="btn-sm btn btn-warning">Skip</a>
+          {% endif %}
+        </div>
 
-      <div class="form-group">
-       	{% if current_step >1 %}
-       	    <a href="?before={{current_step|e}}" onclick="return back_with_fallback(this)" id="back" class="btn-sm btn btn-info">Back</a>
-				{% endif %}
-				{% if current_step and has_more_questions and skip_allowed %}
-       	    <a href="?after={{current_step|e}}" id="skip" class="btn-sm btn btn-warning">Skip</a>
-       	{% endif %}
-      </div>
+      </form>
 
-  	</form>
-
+    </div>
   </div>
-</div>
-
 
 {% endblock %}

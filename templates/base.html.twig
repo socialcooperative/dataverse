@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-				<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <head>
+    <meta charset="UTF-8">
+    <title>
+      {% block title %}Welcome!{% endblock %}
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        {% block stylesheets %}{% endblock %}
+    {% block stylesheets %}{% endblock %}
 
-				{% block javascripts %}{% endblock %}
+    {% block javascripts %}{% endblock %}
 
-    </head>
+  </head>
 
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+  <body>
+    {% block body %}{% endblock %}
+  </body>
 </html>

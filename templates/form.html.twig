@@ -3,31 +3,26 @@
 
 {% block content %}
 
+  <div class="row justify-content-md-center h-100">
+    <div class="col col-md-6  my-auto">
 
-<div class="row justify-content-md-center h-100" >
-  <div class="col col-md-6  my-auto">
+      <h1>{{ title|e }}</h1>
+      <hr/>
 
-  	 <h1>{{ title|e }}</h1>
-  	  	<hr/>
+      <form action="?" method="post" enctype="multipart/form-data" class="">
 
+        {{ form_widget(form) }}
 
-  	<form action="?" method="post" enctype="multipart/form-data" class="">
+        {{ output_code|raw }}
 
-  	    {{ form_widget(form) }}
+        <div class="form-group">
 
-  	    {{ output_code|raw }}
+          <button type="submit" id="form_save" class="btn-success btn-lg btn">Continue</button>
+        </div>
 
+      </form>
 
-      <div class="form-group">
-
-       	 <button type="submit" id="form_save" class="btn-success btn-lg btn">Continue</button>
-       </div>
-
-
-  	</form>
-
+    </div>
   </div>
-</div>
-
 
 {% endblock %}

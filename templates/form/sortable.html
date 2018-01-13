@@ -3,7 +3,7 @@
 
 <ul id="sortable" class="clearfix">
 
-   <?php
+  <?php
    global $sortable;
 	 // print_r($sortable->choices);
 
@@ -17,51 +17,51 @@
 		 foreach($choices as $key=>$val){
 			 include('sortable_item.html');
 			 ?>
-				<ul>
-				<?php
+    <ul>
+      <?php
 					// if(count($choices)>1){
 					foreach($choice_children as $key=>$val){
 						include('sortable_item.html');
 						?>
-		 				<ul>
-		 				</ul>
-		    <?php } ?>
-				</ul>
-   <?php }} ?>
+        <ul>
+        </ul>
+        <?php } ?>
+    </ul>
+    <?php }} ?>
 </ul>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sortable/0.9.13/jquery-sortable-min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function() {
+  $(document).ready(function() {
 
-var group = $('#sortable').sortable({
-	axis: 'y',
-	group: 'serialization',
-	delay: 500,
-	// nested: false,
-	onDrop: function ($item, container, _super) {
+    var group = $('#sortable').sortable({
+      axis: 'y',
+      group: 'serialization',
+      delay: 500,
+      // nested: false,
+      onDrop: function($item, container, _super) {
 
-		var list = group.sortable("serialize").get();
+        var list = group.sortable("serialize").get();
 
-		var data = {};
-		data.sortable = list[0];
+        var data = {};
+        data.sortable = list[0];
 
-		console.log(data);
+        console.log(data);
 
-		var jsonString = JSON.stringify(data, null, ' ');
+        var jsonString = JSON.stringify(data, null, ' ');
 
-		// console.log(jsonString);
+        // console.log(jsonString);
 
-		$.ajax({
-            data: jsonString,
-            type: 'POST',
-            url: '?'
+        $.ajax({
+          data: jsonString,
+          type: 'POST',
+          url: '?'
         });
 
-		_super($item, container);
-	}
-});
+        _super($item, container);
+      }
+    });
 
-});
+  });
 </script>

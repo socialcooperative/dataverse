@@ -1,25 +1,26 @@
 {% extends "bootstrap_4_layout.html.twig" %}
 
 {% block form_widget_simple %}
-	{% for attrname, attrvalue in attr %}
-      {% if attrname == 'data-help' %}
-          <small class="form-text text-muted">{{ attrvalue|trans }}</small>
-      {% endif %}
+  {% for attrname, attrvalue in attr %}
+    {% if attrname == 'data-help' %}
+      <small class="form-text text-muted">{{ attrvalue|trans }}</small>
+    {% endif %}
   {% endfor %}
-	{{- parent() -}}
+  {{- parent() -}}
 {% endblock %}
 
 {% block textarea_widget %}
-	{% for attrname, attrvalue in attr %}
-      {% if attrname == 'data-help' %}
-          <small class="form-text text-muted">{{ attrvalue|trans }}</small>
-      {% endif %}
+  {% for attrname, attrvalue in attr %}
+    {% if attrname == 'data-help' %}
+      <small class="form-text text-muted">{{ attrvalue|trans }}</small>
+    {% endif %}
   {% endfor %}
-	{{- parent() -}}
+  {{- parent() -}}
 {% endblock %}
 
 {% block customcode_widget %}
   <div class="customcode_widget">
-		{% if attr.html %}{{ attr.html|raw }}{% endif %}
+    {% if attr.html %}{{ attr.html|raw }}
+    {% endif %}
   </div>
 {% endblock %}

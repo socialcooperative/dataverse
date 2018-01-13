@@ -1,73 +1,74 @@
 {% extends "layout.html.twig" %}
-{% form_theme form with ['bootstrap_4_layout.html.twig', _self] %}
+{% form_theme form with['bootstrap_4_layout.html.twig', _self] %}
 
 {% block content %}
 
-<div class="row justify-content-md-center" >
-  <div class="col col-md-6">
+  <div class="row justify-content-md-center">
+    <div class="col col-md-6">
 
-  <h1>{{ title|e }}</h1>
-<!--  <h2>Ask a question</h2>-->
-  	<hr/>
+      <h1>{{ title|e }}</h1>
+      <!-- <h2>Ask a question</h2>-->
+      <hr/>
 
-  	<form method="post">
+      <form method="post">
 
-  	    {% block radio_label %}
-  	        {# Do not display the label if widget is not defined in order to prevent double label rendering #}
-  	        {% if widget is defined %}
-  	            {% if required %}
-  	                {% set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' required')|trim}) %}
-  	            {% endif %}
-  	            {% if parent_label_class is defined %}
-  	                {% set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' ' ~ parent_label_class)|trim}) %}
-  	            {% endif %}
-  	            {% if label is not same as(false) and label is empty %}
-  	                {% set label = name|humanize %}
-  	            {% endif %}
-  	            <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>
-  	                {{- widget|raw }} {{ label is not same as(false) ? (translation_domain is same as(false) ?  label|raw : label|trans({}, translation_domain)|raw ) -}}
-  	            </label>
-  	        {% endif %}
-  	    {% endblock radio_label %}
+        {% block radio_label %}
+          {# Do not display the label if widget is not defined in order to prevent double label rendering #}
+          {% if widget is defined %}
+            {% if required %}
+              {% set label_attr = label_attr | merge({
+                class: (label_attr.class | default('') ~ ' required') | trim
+              }) %}
+            {% endif %}
+            {% if parent_label_class is defined %}
+              {% set label_attr = label_attr | merge({
+                class: (label_attr.class | default('') ~ ' ' ~ parent_label_class) | trim
+              }) %}
+            {% endif %}
+            {% if label is not same as(false)and label is empty %}
+              {% set label = name | humanize %}
+            {% endif %}
+            <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}" {% endfor %}>
+              {{- widget|raw }}
+              {{ label is not same as(false) ? (translation_domain is same as(false) ?  label|raw : label|trans({}, translation_domain)|raw ) -}}
+            </label>
+          {% endif %}
+        {% endblock radio_label %}
 
-  	    {{ form_widget(form) }}
+        {{ form_widget(form) }}
 
-  	    <div class="form-group">
-  	      	   <a href="#" id="add-another" class="btn btn-info pull-right">Add another answer</a>
+        <div class="form-group">
+          <a href="#" id="add-another" class="btn btn-info pull-right">Add another answer</a>
 
-  	    	<button type="submit" id="form_save" class="btn-success btn">Save</button>
-  	    </div>
+          <button type="submit" id="form_save" class="btn-success btn">Save</button>
+        </div>
 
+      </form>
 
-  	</form>
+      <script type="text/javascript">
+        // keep track of how many email fields have been rendered
+        var itemCount = '{{ form.answer|length }}';
 
-  	<script type="text/javascript">
-  	    // keep track of how many email fields have been rendered
-  	    var itemCount = '{{ form.answer|length }}';
+        jQuery(document).ready(function() {
+          jQuery('#add-another').click(function(e) {
+            e.preventDefault();
 
-  	    jQuery(document).ready(function() {
-  	        jQuery('#add-another').click(function(e) {
-  	            e.preventDefault();
+            var fieldsList = jQuery('#form_answer');
 
-  	            var fieldsList = jQuery('#form_answer');
+            // grab the prototype template
+            var newWidget = fieldsList.attr('data-prototype');
+            // replace the "__name__" used in the id and name of the prototype with a number that's unique to your answers end name attribute looks like name="contact[answers][2]"
+            newWidget = newWidget.replace(/__name__/g, itemCount);
+            itemCount++;
 
-  	            // grab the prototype template
-  	            var newWidget = fieldsList.attr('data-prototype');
-  	            // replace the "__name__" used in the id and name of the prototype
-  	            // with a number that's unique to your answers
-  	            // end name attribute looks like name="contact[answers][2]"
-  	            newWidget = newWidget.replace(/__name__/g, itemCount);
-  	            itemCount++;
+            // create a new list element and add it to the list
+            var newLi = jQuery('<div></div>').html(newWidget);
+            newLi.appendTo(fieldsList);
+          });
+        })
+      </script>
 
-  	            // create a new list element and add it to the list
-  	            var newLi = jQuery('<div></div>').html(newWidget);
-  	            newLi.appendTo(fieldsList);
-  	        });
-  	    })
-  	</script>
-
+    </div>
   </div>
-</div>
-
 
 {% endblock %}
