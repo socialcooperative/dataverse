@@ -2,12 +2,16 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Routing\Annotation\Route;
 
 
 class Homepage extends Controller
 {
-    public function index(){
-			return $this->render('homepage/index.html.twig', array(
+		/**
+		* @Route("/", name="homepage")
+		*/
+		public function index(){
+			return $this->render('general/home.html.twig', array(
             'name' => 'friend',
         ));
 		}
