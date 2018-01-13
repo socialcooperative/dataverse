@@ -1,0 +1,67 @@
+html, body, .contain-all {
+    height: 100%;
+}
+
+body, p {
+	font-size:1rem;
+}
+
+.table {
+	font-size:0.9rem;
+}
+
+.form-group{
+	margin-bottom: 1rem;
+	margin-top: 1.5rem;
+}
+
+.form-control-label, .col-form-legend{
+	width: 100%;
+	font-weight: bold;
+	font-size:1.15rem;
+	margin-bottom: .25rem;
+}
+.form-text{
+	margin-top: 0;
+	margin-bottom: .25rem;
+}
+.form-control, .select2-container, .select2-selection {
+	line-height: 150%;
+	font-size: 0.9rem;
+}
+input.form-control, .select2-container, .select2-selection {
+	height: auto !important;
+}
+
+select.form-control {
+	margin: 2px;
+	font-size: 0.9rem;
+}
+
+input[type=radio], input[type=checkbox] {
+    border: 0px;
+    width: 0.8rem;
+    height: 0.8rem;
+}
+
+#form input.form-control, #form textarea {
+	padding: .45rem .9rem;
+	width: 100%;
+	border: 2px dashed #ddd !important;
+}
+
+textarea, textarea.form-control{
+	overflow:hidden;
+	padding:10px;
+}
+
+#form input.fieldtype-Phone{
+	padding-left: 52px !important;
+}
+
+#form .fieldtype-DateAndTime input {
+	max-width: 240px;
+}
+#form .fieldtype-DateAndTime input[type=time] {
+	max-width: 140px;
+}

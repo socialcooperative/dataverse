@@ -1,0 +1,51 @@
+#dataverse_black_out {
+	background: #000;
+	opacity: 0.6;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	z-index: 9999;
+}
+
+#dataverse_contain {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	z-index: 99999;
+}
+
+#dataverse_contain #dataverse_contain_embed {
+	min-width: 300px;
+	min-height: 300px;
+	height: 100%;
+	width: 100%;
+	max-width: 600px;
+	max-height: 700px;
+	border: 1px solid #555;
+	box-shadow: 2px 2px 40px #222;
+	z-index: 999999;
+	display: none;
+	border-radius: 10px;
+  padding: 5px 2px 3px 5px;
+  background-color: #fff;
+}
+
+#dataverse_contain iframe {
+	width: 100%;
+	height: 100%;
+	border: none;
+}
+
+#dataverse_contain #dataverse_loader {
+	background: url('/images/loading-big.svg');
+	background-repeat: no-repeat;
+	width: 105px;
+	height: 105px;
+}
