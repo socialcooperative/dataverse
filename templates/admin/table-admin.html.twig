@@ -14,7 +14,7 @@
           <th>Comment</th>
           <th>Country</th>
           <th>
-            <a href="{{ pagination.sortingUrl('ts_started') }}">Date</a>
+            <a href="{# pagination.sortingUrl('ts_started') #}">Date</a>
           </th>
         </tr>
       </thead>
@@ -31,7 +31,13 @@
               <!--{{ it.id }}-->
             </td>
             <td>
-              <a href="mailto:{{ it.email }}">{{ it.name }}</a>
+              <a href="mailto:{{ it.email }}">
+                {% if it.name %}
+                  {{ it.name }}
+                {% else %}
+                  {{ it.email }}
+                {% endif %}
+              </a>
             </td>
             <td>
               <a href="https://social.coop/@{{ it.username }}" target="_blank">@{{ it.username }}</a>
@@ -49,7 +55,7 @@
       </tbody>
     </table>
     <div class="text-center">
-      {% include 'pagination.twig' %}
+      {# include 'pagination.twig' #}
     </div>
   {% else %}
     <p>No items found.</p>

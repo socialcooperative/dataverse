@@ -14,7 +14,7 @@
           <th>Country</th>
           <th>Status</th>
           <th>
-            <a href="{{ pagination.sortingUrl('ts_started') }}">Date</a>
+            <a href="{# pagination.sortingUrl('ts_started') #}">Date</a>
           </th>
         </tr>
       </thead>
@@ -39,7 +39,7 @@
       </tbody>
     </table>
     <div class="text-center">
-      {% include 'pagination.twig' %}
+      {# include 'pagination.twig' #}
     </div>
   {% else %}
     <p>No items found.</p>

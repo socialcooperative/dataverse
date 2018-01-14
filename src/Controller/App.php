@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use RedBeanPHP\R;
 
-class DataverseApp extends Controller
+class App extends Controller
 {
     public function __construct(LoggerInterface $logger, SessionInterface $session)
     {
@@ -48,6 +48,10 @@ class DataverseApp extends Controller
         $this->db_tables->answer = 'answer';
     }
 
+    public function DateTime()
+    {
+        return R::isoDateTime();
+    }
 
     public function get_include($file)
     {
@@ -58,44 +62,34 @@ class DataverseApp extends Controller
 
 
     /**
-     * Sanitizes a username, stripping out unsafe characters.
-     *
-     * Removes tags, octets, entities, and if strict is enabled, will only keep
-     * alphanumeric, _, space, ., -, @. After sanitizing, it passes the username,
-     * raw username (the username in the parameter), and the value of $strict as
-     * parameters for the 'sanitize_user' filter.
-     *
-     * @since 2.0.0
-     *
-     * @param string $username The username to be sanitized.
-     * @param bool $strict If set limits $username to specific characters. Default false.
-     * @return string The sanitized username
+     * Sanitizes a string, stripping out all unsafe characters.
      */
-    public function sanitize_user($username, $no_spaces = true, $lower=false)
+    public function sanitize_string($string, $no_spaces = true, $lower = false, $seperator = '_')
     {
-        $username = strip_tags($username);
+        $string = strip_tags($string);
         if ($lower) {
-            $username = strtolower($username);
+            $string = strtolower($string);
         }
         // Kill octets
-        $username = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '', $username);
-        $username = preg_replace('/&.+?;/', '', $username); // Kill entities
+        $string = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '', $string);
+        $string = preg_replace('/&.+?;/', '', $string); // Kill entities
 
-        $username = str_replace('-', '_', $username);
+        $string = str_replace('_', $seperator, $string); // consolidate dashes
+        $string = str_replace('-', $seperator, $string);
 
         // reduce to ASCII subset for max portability.
-        $username = preg_replace('|[^a-z0-9 _]|i', '', $username);
+        $string = preg_replace("|[^a-z0-9 $seperator]|i", '', $string);
 
         // Consolidate contiguous whitespace
-        $username = preg_replace('|\s+|', ($no_spaces? '_': ' '), $username);
-        if ($no_spaces) {
-            $username = str_replace(' ', '_', $username);
+        $string = preg_replace('|\s+|', ($no_spaces ? $seperator : ' '), $string);
+
+        if ($no_spaces) { // remove spaces
+            $string = str_replace(' ', $seperator, $string);
         }
 
-        $username = trim($username, ' _');
-        //echo $username;
+        $string = trim($string, ' '.$seperator);
 
-        return $username;
+        return $string;
     }
 
     public function admin_auth($blocking = true, $token_type='admin_token')

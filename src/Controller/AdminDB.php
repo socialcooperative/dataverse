@@ -3,7 +3,7 @@ namespace App\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
 
-class AdminDB extends DataverseApp
+class AdminDB extends App
 {
     /**
     * @Route("/admin/data", name="admin_data")

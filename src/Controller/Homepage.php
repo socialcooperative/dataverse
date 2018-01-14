@@ -3,7 +3,7 @@ namespace App\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
 
-class Homepage extends DataverseApp
+class Homepage extends App
 {
     /**
     * @Route("/", name="homepage")
