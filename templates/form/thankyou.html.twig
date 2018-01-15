@@ -8,4 +8,8 @@
     You have answered all the questions.
   </p>
 
+  {% if back_link %}
+    <a href="{{back_link}}" id="back" class="btn-sm btn btn-info">Start over</a>
+  {% endif %}
+
 {% endblock %}

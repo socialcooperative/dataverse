@@ -17,17 +17,20 @@ class App extends Controller
         $this->logger = $logger;
         $this->session = $session;
 
-        $base_path = dirname(dirname(dirname(__FILE__))).'/';
-
         global $bv;
-        include_once($base_path.'custom/secrets.php');
+        if(!$bv) $bv = new class{};
+        $bv->base_path = $base_path = dirname(dirname(dirname(__FILE__))).'/';
+
+        if (file_exists($bv->base_path.'custom/secrets.php')) {
+            include_once($bv->base_path.'custom/secrets.php');
+        } else {
+            include_once($bv->base_path.'config/secrets.php');
+        }
+
         // include_once($this->conf->base_path.'src/misc.php');
 
         $this->conf = $bv->config;
-
-        if (!$this->conf->base_path) {
-            $this->conf->base_path = $base_path;
-        }
+        $this->conf->base_path = $base_path;
 
         if ($this->conf->db_type=='mysql') {
             R::setup('mysql:host='.$this->conf->dbcreds['host'].';dbname='.$this->conf->db_name, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
@@ -46,6 +49,39 @@ class App extends Controller
         $this->db_tables->respondent = 'respondent';
         $this->db_tables->response = 'response';
         $this->db_tables->answer = 'answer';
+        $this->col_prefix = "the";
+
+        $this->answer_types = [
+                'Notice'=>'Show some text to the user',
+                'ShortText'=>'Text (short)',
+                'LongText'=>'Text (long)',
+                'Choice'=>'Choice from a list',
+                'Dropdown'=>'Choice from a list (dropdown)',
+                'MultipleChoices'=>'Multiple choices from a list',
+                'Email'=>'Email address',
+                'Phone'=>'Phone number',
+                'URL'=>'Webpage / URL',
+                'Likert'=>'Likert scale',
+                'MapLocation'=>'Map / GPS Location',
+                'Language'=>'Language',
+                'Country'=>'Country',
+                'Timezone'=>'Timezone',
+                'Date'=>'Date',
+                'DateTime'=>'Date & Time',
+                'Time'=>'Time',
+                'Birthday'=>'Birthdate',
+                'Number'=>'Number (decimals possible)',
+                'NumberInteger'=>'Number (without decimals)',
+                'Percentage'=>'Percentage',
+                'Currency'=>'Currency',
+                'Price'=>'Price (Number & Currency)',
+                'Password'=>'Password',
+                'UploadImage'=>'Upload Image',
+                'UploadDoc'=>'Upload Document',
+                'UploadFile'=>'Upload Any File',
+                'Sortable'=>'Sortable List',
+                'Include'=>'Embed PHP Script from server /custom/ directory',
+            ];
     }
 
     public function DateTime()

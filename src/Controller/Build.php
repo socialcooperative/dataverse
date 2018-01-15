@@ -120,7 +120,7 @@ class Build extends Backend
 
             $sortable->links = $sortable = new class {
             };
-            $sortable->links->step = '/question?step=';
+            $sortable->links->step = '/q/'.$this->questionnaire->id.'?step=';
             $sortable->links->edit = '/build/question?id=';
             $sortable->links->delete = '/build/question?id=';
 
@@ -133,7 +133,10 @@ class Build extends Backend
             foreach ($questions as $s) {
                 // print_r($s);
                 // if(!$s->step) $s->step = $prev_step+99;
-                $sortable->choices[$s->step][$s->question->id ? $s->question->id : $s->id] = $s->question->question_text ? $s->question->question_text : $s->question_text;
+                $q = new class{};
+                $q->label = $s->question->question_text ? $s->question->question_text : $s->question_text;
+                $q->type = $s->question->answer_type;
+                $sortable->choices[$s->step][$s->question->id ? $s->question->id : $s->id] = $q;
                 $prev_step = $s->step;
             }
 
@@ -253,38 +256,6 @@ class Build extends Backend
             return $this->redirectToRoute('build_list');
         }
 
-
-        $this->answer_types = [
-                'Notice'=>'Show some text to the user',
-                'ShortText'=>'Text (short)',
-                'LongText'=>'Text (long)',
-                'Choice'=>'Choice from a list',
-                'Dropdown'=>'Choice from a list (dropdown)',
-                'MultipleChoices'=>'Multiple choices from a list',
-                'Email'=>'Email address',
-                'Phone'=>'Phone number',
-                'URL'=>'Webpage / URL',
-                'MapLocation'=>'Map / GPS Location',
-                'Language'=>'Language',
-                'Country'=>'Country',
-                'Timezone'=>'Timezone',
-                'Date'=>'Date',
-                'DateTime'=>'Date & Time',
-                'Time'=>'Time',
-                'Birthday'=>'Birthdate',
-                'Number'=>'Number (decimals possible)',
-                'NumberInteger'=>'Number (without decimals)',
-                'Percentage'=>'Percentage',
-                'Currency'=>'Currency',
-                'Price'=>'Price (Number & Currency)',
-                'Password'=>'Password',
-                'UploadImage'=>'Upload Image',
-                'UploadDoc'=>'Upload Document',
-                'UploadFile'=>'Upload Any File',
-                'Sortable'=>'Sortable List',
-                'Include'=>'Embed PHP Script from server /custom/ directory',
-            ];
-
         // $this->answer_examples = [
         //     'NumberInteger'=>1,
         //     'LongText'=>2,
@@ -363,7 +334,7 @@ class Build extends Backend
                 ])
                ->add('answer', CollectionType::class, array(
                    // each entry in the array will be an "email" field
-                    'label' => 'For OneChoice, MultiChoices, ListChoice, Sortable –  add possible answers:',
+                    'label' => 'For multiple choice answers, add options:',
                    'entry_type'   => TextType::class,
                    'allow_add'	=> true,
                    // these options are passed to each "email" type

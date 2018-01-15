@@ -1,32 +1,51 @@
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin="" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.0/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.3.0/dist/leaflet.js"></script>
 
-<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg==" crossorigin=""></script>
-
-<script src="https://unpkg.com/leaflet-google-places-autocomplete@0.0.8/src/js/leaflet-gplaces-autocomplete.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet-google-places-autocomplete@0.0.8/src/css/leaflet-gplaces-autocomplete.css" />
+<script src="/js/leaflet-gplaces-autocomplete.js"></script>
+<link rel="stylesheet" href="/css/leaflet-gplaces-autocomplete.css" />
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTQM0OAKfPQP8IYRjEvL8fthq6MIk9Me8&libraries=places"></script>
-
 
 
 <div id="mapid" style="width: 540px; height: 480px;"></div>
 
 <script>
-  function map_mark(e) {
 
-    locationMark.setLatLng(e.latlng).addTo(mymap);
+  function map_mark(latlng) {
 
-    map_mark_store(e.latlng);
+    locationMark.setLatLng(latlng).addTo(mymap);
+
+    map_mark_store(latlng);
 
     $('.leaflet-gac-control').val('');
   }
 
   function map_mark_store(loc) {
-    //console.log(loc);
+    console.log(loc);
     $(loc_field).val(loc.lat + ',' + loc.lng);
   }
 
-  var mymap = L.map('mapid').fitWorld();
+  function onLocationFound(e) {
+    var radius = e.accuracy / 2;
+
+    L.circle(e.latlng, radius).addTo(mymap);
+
+    map_mark(e.latlng);
+  }
+
+  function onLocationError(e) {
+    alert(e.message);
+  }
+
+  function onMapClick(e) {
+    map_mark(e.latlng);
+  }
+
+var mymap, latlng, locationMark;
+
+$(document).ready(function() { // onload
+
+  mymap = L.map('mapid').fitWorld();
 
   L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/outdoors-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWF5ZWwiLCJhIjoiY2oybTJwMGV0MDAxcTMzcW5xZng3NGMwaiJ9.76-N3Xrxhp4AkqONtrXjuw', {
     minZoom: 1,
@@ -38,25 +57,9 @@
     id: 'mapbox.streets'
   }).addTo(mymap);
 
-  var locationMark = L.marker();
-
-  function onMapClick(e) {
-    map_mark(e);
-  }
+  locationMark = L.marker();
 
   mymap.on('click', onMapClick);
-
-  function onLocationFound(e) {
-    var radius = e.accuracy / 2;
-
-    L.circle(e.latlng, radius).addTo(mymap);
-
-    map_mark(e);
-  }
-
-  function onLocationError(e) {
-    alert(e.message);
-  }
 
   mymap.on('locationfound', onLocationFound);
   mymap.on('locationerror', onLocationError);
@@ -71,7 +74,7 @@
       callback: function(location) {
         //console.log(location); // object of google place is given
 
-        var latlng = L.latLng([
+        latlng = L.latLng([
           location.geometry.location.lat(),
           location.geometry.location.lng()
         ]);
@@ -94,4 +97,11 @@
       }
     })
     .addTo(mymap);
+
+  if(loc && loc.lat && loc.lng){
+    mymap.panTo(loc);
+    map_mark(loc); // pin existing location
+  }
+
+});
 </script>

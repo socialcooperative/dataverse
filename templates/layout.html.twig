@@ -18,6 +18,10 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script>
 
+  {% if custom_scripts is defined %}
+    {{custom_scripts|raw}}
+  {% endif %}
+
   <script src="{{ asset('js/scripts.js?v3') }}"></script>
 {% endblock %}
 

@@ -1,16 +1,20 @@
 <li data-id="<?=$key?>">
-  <?=$val?>
 
-    <?php if($sortable->links->delete){ ?>
+  <?=($val->label ? $val->label : $val)?>
+
+  <?php if($sortable->links->delete){ ?>
     <a href="#" onclick="ajax_delete('<?=$sortable->links->delete.$key?>',$(this).closest('li'))" class="btn btn-sm float-right"><i class="fa fa-trash" aria-hidden="true"></i></a>
-    <?php } ?>
+  <?php } ?>
 
-    <?php if($sortable->links->edit){ ?>
-    <a href="<?=$sortable->links->edit.$key?>" class="btn btn-sm float-right"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-    <?php } ?>
-
-    <?php if($sortable->links->step){ ?>
-    <a href="<?=$sortable->links->step.$step?>" class="btn btn-sm float-right"><i class="fa fa-link" aria-hidden="true"></i></a>
+  <?php if($sortable->links->edit){ ?>
     <a href="#" onclick="clone_to($(this).closest('li'), $(this).closest('ul'))" class="btn btn-sm float-right"><i class="fa fa-copy" aria-hidden="true"></i></a>
+    <a href="<?=$sortable->links->edit.$key?>" class="btn btn-sm float-right"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+  <?php } ?>
 
-    <?php } ?>
+  <?php if($sortable->links->step){ ?>
+    <a href="<?=$sortable->links->step.$step?>" class="btn btn-sm float-right"><i class="fa fa-link" aria-hidden="true"></i></a>
+  <?php } ?>
+
+<?=($val->type ? "<small class='float-right'>$val->type</small>" : '')?>
+
+<span class='clearfix'></span>

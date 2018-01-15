@@ -1,6 +1,5 @@
 <link rel="stylesheet" href="/css/sortable.css" />
 
-
 <ul id="sortable" class="clearfix">
 
   <?php
@@ -19,13 +18,13 @@
 			 ?>
     <ul>
       <?php
-					// if(count($choices)>1){
+					if(count($choice_children)){
 					foreach($choice_children as $key=>$val){
 						include('sortable_item.html');
 						?>
         <ul>
         </ul>
-        <?php } ?>
+      <?php }} ?>
     </ul>
     <?php }} ?>
 </ul>

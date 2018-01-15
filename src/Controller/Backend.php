@@ -74,7 +74,7 @@ class Backend extends Frontend
             $step->questionnaire_id = $this->questionnaire->id;
 
             $step->step = $step_num ? $step_num : $previous_step->step_num+1;
-            $step->order = $step_order ? $step_order : $previous_step->step_order+1;
+            $step->step_order = $step_order ? $step_order : $previous_step->step_order+1;
 
             R::store($step);
         }

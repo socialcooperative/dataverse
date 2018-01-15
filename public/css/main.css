@@ -65,3 +65,8 @@ textarea, textarea.form-control{
 #form .fieldtype-DateAndTime input[type=time] {
 	max-width: 140px;
 }
+
+#form .bootstrap-datetimepicker-widget {
+  margin-top: 14px;
+  max-width: 400px;
+}

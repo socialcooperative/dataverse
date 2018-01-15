@@ -12,8 +12,7 @@ class Frontend extends App
 
     public function field_params($params=[])
     {
-        global $field_params;
-        return array_merge($field_params, $params);
+        return array_merge($this->field_params, ['label' => $this->field_label, 'attr' => $this->attr, 'data' => $this->field_value], $params);
     }
 
     public function item_save($table_name = 'item', $data = [], $custom_linked_items=false)
@@ -28,7 +27,7 @@ class Frontend extends App
 
         // if(!is_array($data)) $data = (array) $data; // make sure we are dealing with an array
         // print_r($data);
-        // error_log($this->item);
+        $this->logger->info('item_save()', $data);
 
         foreach ($data as $key => $value) {
             // var_dump('item foreach', $key , $value, is_array($value));
@@ -40,9 +39,9 @@ class Frontend extends App
                     // error_log('>0');
                             if ($custom_linked_items) { // we're already getting Redbean objects
 
-                                    $linked_ref = 'shared'.ucwords($custom_linked_items).'List';
-
+                                $linked_ref = 'shared'.ucwords($custom_linked_items).'List';
                                 $this->item->{$linked_ref} = $value; // store relation
+
                             } else {
                                 $linked_ref = 'shared'.ucwords($key).'List';
 
@@ -66,28 +65,26 @@ class Frontend extends App
         return R::store($this->item);
     }
 
-    public function respondent_questions_responses_save($data, $col_prefix = "the")
+    public function respondent_questions_responses_save($data)
     { // save object in DB, with support for many to many for items with array of data
 
-
-        //print_r([$this->respondent, $this->question, $data, $this->response]);
-
         //$this->response = R::dispense( $this->db_tables->response ); // init response
+
+        $this->logger->info('respondent_questions_responses_save()', [$data, $this->questions_by_field]);
 
         foreach ($data as $key => $value) {
             // var_dump($key , $value, $this->questions_by_field[$key]->question_text);
 
-            if ($this->questions_by_field[$key]) {
+            if ($this->questions_by_field[$key]) { // to handle multiple questions on one screen
                 $this->question = $this->questions_by_field[$key];
-            } // to handle multiple questions on one screen
+            }
 
-            // return
-            $this->respondent_question_responses_save($key, $value, $data, $col_prefix = "the");
+            $this->respondent_question_responses_save($key, $value, $data);
         }
         // exit();
     }
 
-    public function respondent_question_responses_save($key, $value, $data, $col_prefix = "the")
+    public function respondent_question_responses_save($key, $value, $data)
     { // save object in DB, with support for many to many for items with array of data
 
 
@@ -108,7 +105,7 @@ class Frontend extends App
                                 unset($this->response);
                             }  // create an additional response row
 
-                            $respond[$col_prefix.'Num'] = $ord;
+                            $respond[$this->col_prefix.'Num'] = $ord;
 
                             $response_ids[] = answer_response_save($answer, $respond);
 
@@ -128,7 +125,7 @@ class Frontend extends App
 
             if ($value) {
                 if (in_array($this->answer_type, ['UploadImage','UploadDoc','UploadFile'])) {
-                    $dir = __DIR__.'/../web/uploads';
+                    $dir = $this->conf->base_path.'custom/uploads';
                     $file = $value;
 
                     // compute a random name and try to guess the extension (more secure)
@@ -144,22 +141,27 @@ class Frontend extends App
 
                     $value = $filename;
                     $col_name = 'Var';
+
                 } elseif ($this->answer_type=='Email') { // save email in main 'respondent' table
                     $this->respondent->email = $value;
                     R::store($this->respondent);
                     $col_name = 'Var';
+
                 } elseif ($this->answer_type=='MapLocation') {
                     $col_name = 'Point';
-                    $geo_col = $this->db_tables->response.'.'.$col_prefix.'_'.'point';
+                    $geo_col = $this->db_tables->response.'.'.$this->col_prefix.'_'.'point';
                     R::bindFunc('read', $geo_col, 'asText');
                     R::bindFunc('write', $geo_col, 'GeomFromText');
                     $point_num = str_replace(',', ' ', $value);
                     $value = "POINT($point_num)";
+
                 } elseif ($this->answer_type=='Currency') {
                     $this->currency_set($value); // save selected currency in session
+
                 } elseif (in_array($this->answer_type, ['MultipleChoices','Choice','Dropdown'])) { // form can submit IDs of answers rather than contents
-                            $try_by_id=true;
-                } elseif ($value instanceof DateTime) { // Date, DateTime, or Time
+                    $try_by_id=true;
+
+                } elseif ($value instanceof DateTime || is_a($value, 'DateTime')) { // Date, DateTime, or Time
                     $date = $value->format('Y-m-d');
                     $time = $value->format('H:i:s');
                     if ($date=='1970-01-01') {
@@ -181,8 +183,8 @@ class Frontend extends App
                     $col_name = 'Num';
                 }
 
-                if ($col_name && $col_prefix) {
-                    $col_name = $col_prefix.$col_name;
+                if ($col_name && $this->col_prefix) {
+                    $col_name = $this->col_prefix.$col_name;
                 }
 
                 // var_dump("<p>", $col_name, $this->answer_type, $try_by_id);
@@ -190,23 +192,26 @@ class Frontend extends App
                 if ($this->answer_type=='Price') { // both number & currency
 
                     $this->currency_get(); // load existing cookie
-                            $this->currency_set($data['currency']); // set new cookie if selected
+                    if($data['currency']) $this->currency_set($data['currency']); // set new cookie if selected
 
-                            $respond[$col_name] = $value; // Price amount
+                    $respond[$col_name] = $value; // Price amount
 
                     $answer = $this->answer_prepare($this->currency); // get currency ID
 
                     $response_ids[] = $this->answer_response_save($answer, $respond); // save Price & currency ID
 
                     $this->response_save_custom($value); // amount
-                            $this->response_save_custom($this->currency, 'currency'); // currency code
+
+                    $this->response_save_custom($this->currency, 'currency'); // currency code
+
                 } elseif ($col_name && !$try_by_id) { // simply store in appropriate column of response table
 
-                            $respond[$col_name] = $value; // store
+                    $respond[$col_name] = $value; // store
 
                     $response_ids[] = $this->response_save($respond);
 
                     $this->response_save_custom($value);
+
                 } elseif (is_array($value)) { // store (multiple answers) in answer table
 
                     $try_by_id=true;
@@ -296,18 +301,17 @@ class Frontend extends App
     public function response_save($respond)
     {
         try {
-            if ($respond['answer']) { // let's modify a past answer
-
-                error_log("let's modify past answer: ".$respond['answer']->id);
+            if ($respond['answer']) {
+                $this->logger->info('modify past answer:', [$respond]);
 
                 $find = [ 'respondent_id' => $this->respondent->id, 'question_id' => $this->question->id, 'answer_id' => $respond['answer']->id ];
                 $this->response = R::findOrCreate($this->db_tables->response, $find);
+
             } else {
-                $this->response = R::dispense($this->db_tables->response); // init new response
+
+                $this->logger->info('prepare for new response:', [$respond]);
+                $this->response = R::dispense($this->db_tables->response);
             }
-
-
-            //var_dump($respond, $find, $this->response); exit();
 
             $this->response->respondent = $this->respondent; // ownership
             $this->response->question = $this->question; // link to question
@@ -323,8 +327,9 @@ class Frontend extends App
             unset($this->response);
             //exit($id);
             return $id;
+
         } catch (Exception $e) {
-            error_log("Could not save a response (probably duplicate)");
+            $this->logger->error('Could not save a response (probably duplicate', [$e]);
             // TODO
         }
     }
@@ -352,21 +357,19 @@ class Frontend extends App
             //exit($id);
             return $id;
         } catch (Exception $e) {
-            error_log("Could not save a response to custom table (probably duplicate)");
+            $this->logger->error('Could not save a response (probably duplicate', [$e]);
             // TODO
         }
     }
 
     public function currency_get()
     {
-        global $app;
         $this->currency = $this->session->get('currency');
         return $this->currency;
     }
 
     public function currency_set($currency)
     {
-        global $app;
         if ($currency) {
             $this->currency = $currency;
             $this->session->set('currency', $currency); // save
@@ -420,6 +423,8 @@ class Frontend extends App
 
     public function response_by_question_id($question_id, $respondent_id)
     {
+        $geo_col = $this->db_tables->response.'.'.$this->col_prefix.'_'.'point';
+        R::bindFunc('read', $geo_col, 'asText');
         return R::findOne($this->db_tables->response, ' question_id = ? AND  respondent_id = ? ORDER BY response_ts DESC ', [ $question_id, $respondent_id ]);
     }
 
@@ -435,12 +440,12 @@ class Frontend extends App
 
     public function questionnaire_steps($id)
     {
-        return R::find('step', 'questionnaire_id = ? ORDER BY step ASC, "order" ASC ', [ $id ]);
+        return R::find('step', 'questionnaire_id = ? ORDER BY step ASC, step_order ASC ', [ $id ]);
     }
 
     public function questionnaire_step($step)
     {
-        return R::find('step', 'questionnaire_id = ? AND step = ? ORDER BY "order" ASC', [$this->questionnaire->id, $step]);
+        return R::find('step', 'questionnaire_id = ? AND step = ? ORDER BY step_order ASC', [$this->questionnaire->id, $step]);
     }
 
     public function questionnaire_next_step($step)
@@ -450,7 +455,7 @@ class Frontend extends App
 
     public function questionnaire_last_step()
     {
-        return R::findOne('step', 'questionnaire_id = ? ORDER BY step DESC, ORDER BY "order" DESC LIMIT 1 ', [$this->questionnaire->id]);
+        return R::findOne('step', 'questionnaire_id = ? ORDER BY step DESC, step_order DESC LIMIT 1 ', [$this->questionnaire->id]);
     }
 
     public function step_get($id)
