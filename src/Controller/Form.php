@@ -537,7 +537,7 @@ class Form extends Frontend
             case "UploadDoc":
             case "UploadFile":
 
-                $form_builder->add($this->field_name, FileType::class, $this->field_params([]));
+                $form_builder->add($this->field_name, FileType::class, $this->field_params(['data_class'=>null]));
 
                 break;
             case "URL":
