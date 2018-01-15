@@ -1,0 +1,16 @@
+<link rel="stylesheet" href="/css/likert.css" />
+
+<ul class="likert clearfix">
+
+  <?php
+   global $likert;
+
+   foreach($likert->choices as $key=>$o){
+			 ?>
+    <li>
+      <input type="radio" name="form[<?=$likert->field_name?>]" value="<?=$key?>" <?=$o->selected ? 'checked="checked"' : ''?>>
+      <label><?=$o->val?></label>
+    </li>
+    <?php
+			} ?>
+</ul>
