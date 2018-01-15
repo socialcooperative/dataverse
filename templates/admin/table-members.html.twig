@@ -1,6 +1,6 @@
 {% extends "layout.html.twig" %}
 {% block content %}
-  <h1>List</h1>
+  <h1>{{ items.getTotalItemCount }} people</h1>
   {% if items %}
     <table class="table table-sm table-hover table-bordered">
       <thead class="thead-inverse">
@@ -38,8 +38,8 @@
         {% endfor %}
       </tbody>
     </table>
-    <div class="text-center">
-      {# include 'pagination.twig' #}
+    <div class="navigation float-right">
+      {{ knp_pagination_render(items) }}
     </div>
   {% else %}
     <p>No items found.</p>

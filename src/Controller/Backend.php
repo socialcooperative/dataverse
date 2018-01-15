@@ -9,46 +9,36 @@ class Backend extends Frontend
 {
 
   /**
-  * @Route("/admin/members/{page}/{sort_by}/{sorting}", name="admin_members")
+  * @Route("/admin/respondents/{questionnaire_id}/{page}/{sort_by}/{sorting}", name="admin_respondents", requirements={"questionnaire_id"="\d+", "page"="\d+", "sort_by": "[a-zA-Z0-9_]+", "sorting": "asc|desc"})
   */
-    public function admin_members($page, $sort_by, $sorting)
+    public function admin_respondents($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
     {
-        global $paginator;
 
         $this->admin_auth();
 
-        $people = $this->respondents_browse($page, $sort_by, $sorting);
-
-        // if ($people) {
-        //     $pagination = new Pagination($paginator, $app['url_generator'], 'admin/members', $sort_by, $sorting);
-        // }
+        $people = $this->respondents_browse($questionnaire_id, $page, $sort_by, $sorting);
 
         return $this->render('admin/table-admin.html.twig', array(
     'items' => $people,
-    'pagination' => $pagination
+    'pagination' => $this->pagination
 ));
     }
 
     /**
-    * @Route("/browse/{page}/{sort_by}/{sorting}", name="browse_members")
+    * @Route("/build/respondents/{questionnaire_id}/{page}/{sort_by}/{sorting}", name="browse_respondents", requirements={"questionnaire_id"="\d+", "page"="\d+", "sort_by": "[a-zA-Z0-9_]+", "sorting": "asc|desc"})
     */
-    public function browse_members($page, $sort_by, $sorting)
+    public function browse_respondents($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
     {
-      global $paginator;
 
         if (!$this->member_auth(false)) {
             $this->admin_auth(true);
         }
 
-        $people = $this->respondents_browse($page, $sort_by, $sorting);
-
-        // if ($people) {
-        //     $pagination = new Pagination($paginator, $app['url_generator'], 'browse', $sort_by, $sorting);
-        // }
+        $people = $this->respondents_browse($questionnaire_id, $page, $sort_by, $sorting);
 
         return $this->render('admin/table-members.html.twig', array(
       'items' => $people,
-      'pagination' => $pagination
+      'pagination' => $this->pagination
   ));
     }
 
@@ -173,46 +163,46 @@ class Backend extends Frontend
         return $ret;
     }
 
-    public function respondents_browse($page, $sort_by, $sorting)
+    public function respondents_browse($questionnaire_id, $page, $sort_by, $sorting)
     {
-        global $paginator;
 
-        $this->questionnaire_id = $_GET['questionnaire'] ? $_GET['questionnaire'] : $this->session->get('questionnaire'); // get from session
-
-        if (!$this->questionnaire_id) {
-            $this->questionnaire_id = 2;
-        }
+        $this->questionnaire_id = $questionnaire_id ? $questionnaire_id : $this->session->get('questionnaire'); // get from session
 
         // R::debug();
 
-        $count = (int) R::count('respondent', ' questionnaire_id = ? AND email IS NOT NULL ', [ $this->questionnaire_id ]);
+        $count = R::count('respondent', ' questionnaire_id = ? AND email IS NOT NULL ', [ $this->questionnaire_id ]);
 
-
-        if ($count <1) {
+        if (!$count) {
             return [];
         }
 
         $this->session->set('questionnaire', $this->questionnaire_id); // save as session
 
-        // $paginator =  $app['paginator']($count, $page);
-
         $limits = ($this->conf->db_type == 'postgres' ? ' LIMIT ? OFFSET ? ' : ' LIMIT ? , ? ');
 
-        $params = [ $this->questionnaire_id, 0, 100 ];
+        $per_page = 50;
         // if ($this->conf->db_type == 'postgres') { // TODO
-        //     $params = [ $this->questionnaire_id, $paginator->getPerPage(), $paginator->getStartIndex() ];
+        //     $params = [ $this->questionnaire_id, $per_page, $per_page*($page-1) ];
         // } else {
-        //     $params = [ $this->questionnaire_id, $paginator->getStartIndex(), $paginator->getPerPage() ];
+        //     $params = [ $this->questionnaire_id, $per_page*($page-1), $per_page ];
         // }
 
-        if ($count) {
-            $people = R::find('respondent', " questionnaire_id = ? AND email IS NOT NULL
-  ORDER BY $sort_by $sorting ".$limits, $params);
-        }
+        // $people = R::find('respondent', " questionnaire_id = ? AND email IS NOT NULL ORDER BY $sort_by $sorting ".$limits, $params); // with hard limits
+        $people = R::find('respondent', " questionnaire_id = ? AND email IS NOT NULL ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]); // list all
 
-        foreach ($people as $p) {
+        if ($people) {
+
+          $paginator  = $this->get('knp_paginator');
+          $people = $paginator->paginate(
+              $people, /* ideally query NOT result */
+              $page/*page number*/,
+              $per_page/*limit per page*/
+          );
+
+
+          foreach ($people as $p) {
             $responses = R::find('response', ' respondent_id = ?
-		ORDER BY response_ts ASC', [ $p->id ]);
+		          ORDER BY response_ts ASC', [ $p->id ]);
 
             foreach ($responses as $r) {
                 echo '<p>';
@@ -245,4 +235,6 @@ class Backend extends Frontend
         }
         return $people;
     }
+  }
+
 }
