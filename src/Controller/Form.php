@@ -606,7 +606,7 @@ class Form extends Frontend
                 break;
             case "Include":
 
-                $html = '<div class="form-group" id="'.$this->field_name.'"><label class="form-control-label required">'.$this->field_label.'</label>
+                $html = '<div class="form-group" id="'.$this->field_name.'">
 				' . $this->get_include('custom/'.$this->field_name).'</div>';
                 $this->attr['html'] = $html;
 
