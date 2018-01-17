@@ -31,7 +31,7 @@ function dataverse_open_form() {
 	  $('<iframe/>')
 	);
 
-  $('#dataverse_contain_embed iframe').attr('src', "<?=$bv->config->home_url?>/question?embedded&questionnaire=<?=$_GET['id']?>&step=1");
+  $('#dataverse_contain_embed iframe').attr('src', "<?=$bv->config->home_url?>/q/<?=$_GET['id']?>?embedded&step=1");
   $('#dataverse_contain_embed iframe').on('load', function() {
       $('#dataverse_loader').fadeOut(function() {
           $('#dataverse_contain_embed').fadeIn();
