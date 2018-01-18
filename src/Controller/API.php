@@ -14,7 +14,8 @@ class API extends Admin
         $this->admin_auth();
 
         $status = $_REQUEST['status'] ? $_REQUEST['status'] : 'invite';
-        $ret = new class {};
+        $ret = new class {
+        };
 
         $this->respondent = $this->a_respondent_by_status($status);
 
@@ -35,7 +36,8 @@ class API extends Admin
         $this->admin_auth();
 
         $email = $_REQUEST['email'];
-        $ret = new class {};
+        $ret = new class {
+        };
 
         if ($email) {
             $this->respondent = $this->respondent_find($email);
