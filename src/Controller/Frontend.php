@@ -416,7 +416,7 @@ class Frontend extends App
     {
         $geo_col = $this->db_tables->response.'.'.$this->col_prefix.'_'.'point';
         // R::bindFunc('read', $geo_col, 'asText'); // TODO
-        return R::findOne($this->db_tables->response, ' question_id = ? AND  respondent_id = ? ORDER BY response_ts DESC ', [ $question_id, $respondent_id ]);
+        return R::findOne($this->db_tables->response, ' question_id = ? AND respondent_id = ? ORDER BY response_ts DESC ', [ $question_id, $respondent_id ]);
     }
 
     public function respondents_by_status($status)
@@ -462,6 +462,7 @@ class Frontend extends App
     public function username_by_respondent_id($respondent_id)
     { // get username
         $r = $this->response_by_question_id($this->conf->question_id_username, $respondent_id);
+        // var_dump($this->conf->question_id_username, $respondent_id, $r);
         return $r->the_var ? $r->the_var : $r->answer->answer;
     }
 }

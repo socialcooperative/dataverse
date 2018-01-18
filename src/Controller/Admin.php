@@ -43,10 +43,8 @@ class Admin extends Backend
 
     public function member_get($u)
     {
-        $u = new class {
-        };
 
-        $username = $this->username_by_respondent_id($this->respondent->id);
+        $u->username = $this->username_by_respondent_id($u->id);
 
         if (!$u->username) {
             $u->error .= "Could not find the username. ";
@@ -64,18 +62,13 @@ class Admin extends Backend
         return $u;
     }
 
-    public function member_update()
+    public function member_update($respondent)
     {
-        $email = $_REQUEST['email'];
         $status = $_REQUEST['status'];
         $ret = new class {
         };
 
-        if ($email) {
-            $this->respondent = $this->respondent_find($email);
-        }
-
-        $ret = $this->respondent;
+        $ret = $this->respondent = $respondent;
 
         if (!$this->respondent) {
             $ret->error = "No such member found. ";
@@ -86,14 +79,14 @@ class Admin extends Backend
 
                 $pw = $_REQUEST['password'];
 
-                $username = $this->username_by_respondent_id($this->respondent->id);
+                $ret->username = $this->username_by_respondent_id($this->respondent->id);
 
-                if (!$username) {
-                    $ret->error .= "Could not find the username. ";
+                if (!$ret->username) {
+                    $ret->error .= "Could not find the username";
                 }
 
-                if ($pw && $username) {
-                    if ($this->send_account_email($email, $username, $pw)) {
+                if ($pw && $ret->username) {
+                    if ($this->send_account_email($email, $ret->username, $pw)) {
                         $ret->account_email_sent = true;
                     } else {
                         $ret->error .= "Error trying to send confirmation email (no custom email function). ";
