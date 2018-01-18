@@ -41,7 +41,6 @@ class Frontend extends App
 
                                 $linked_ref = 'shared'.ucwords($custom_linked_items).'List';
                                 $this->item->{$linked_ref} = $value; // store relation
-
                             } else {
                                 $linked_ref = 'shared'.ucwords($key).'List';
 
@@ -141,12 +140,10 @@ class Frontend extends App
 
                     $value = $filename;
                     $col_name = 'Var';
-
                 } elseif ($this->answer_type=='Email') { // save email in main 'respondent' table
                     $this->respondent->email = $value;
                     R::store($this->respondent);
                     $col_name = 'Var';
-
                 } elseif ($this->answer_type=='MapLocation') {
                     $col_name = 'Point';
                     $geo_col = $this->db_tables->response.'.'.$this->col_prefix.'_'.'point';
@@ -154,13 +151,10 @@ class Frontend extends App
                     R::bindFunc('write', $geo_col, 'GeomFromText');
                     $point_num = str_replace(',', ' ', $value);
                     $value = "POINT($point_num)";
-
                 } elseif ($this->answer_type=='Currency') {
                     $this->currency_set($value); // save selected currency in session
-
                 } elseif (in_array($this->answer_type, ['MultipleChoices','Choice','Dropdown'])) { // form can submit IDs of answers rather than contents
                     $try_by_id=true;
-
                 } elseif ($value instanceof DateTime || is_a($value, 'DateTime')) { // Date, DateTime, or Time
                     $date = $value->format('Y-m-d');
                     $time = $value->format('H:i:s');
@@ -192,7 +186,9 @@ class Frontend extends App
                 if ($this->answer_type=='Price') { // both number & currency
 
                     $this->currency_get(); // load existing cookie
-                    if($data['currency']) $this->currency_set($data['currency']); // set new cookie if selected
+                    if ($data['currency']) {
+                        $this->currency_set($data['currency']);
+                    } // set new cookie if selected
 
                     $respond[$col_name] = $value; // Price amount
 
@@ -203,7 +199,6 @@ class Frontend extends App
                     $this->response_save_custom($value); // amount
 
                     $this->response_save_custom($this->currency, 'currency'); // currency code
-
                 } elseif ($col_name && !$try_by_id) { // simply store in appropriate column of response table
 
                     $respond[$col_name] = $value; // store
@@ -211,7 +206,6 @@ class Frontend extends App
                     $response_ids[] = $this->response_save($respond);
 
                     $this->response_save_custom($value);
-
                 } elseif (is_array($value)) { // store (multiple answers) in answer table
 
                     $try_by_id=true;
@@ -306,9 +300,7 @@ class Frontend extends App
 
                 $find = [ 'respondent_id' => $this->respondent->id, 'question_id' => $this->question->id, 'answer_id' => $respond['answer']->id ];
                 $this->response = R::findOrCreate($this->db_tables->response, $find);
-
             } else {
-
                 $this->logger->info('prepare for new response:', [$respond]);
                 $this->response = R::dispense($this->db_tables->response);
             }
@@ -327,7 +319,6 @@ class Frontend extends App
             unset($this->response);
             //exit($id);
             return $id;
-
         } catch (Exception $e) {
             $this->logger->error('Could not save a response (probably duplicate', [$e]);
             // TODO
@@ -468,5 +459,9 @@ class Frontend extends App
         return R::find('step', ' question_id = ? ', [ $id ]);
     }
 
-
+    public function username_by_respondent_id($respondent_id)
+    { // get username
+        $r = $this->response_by_question_id($this->conf->question_id_username, $respondent_id);
+        return $r->the_var ? $r->the_var : $r->answer->answer;
+    }
 }

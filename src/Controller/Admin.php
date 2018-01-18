@@ -11,25 +11,23 @@ class Admin extends Backend
   /**
   * @Route("/admin/respondents/{questionnaire_id}/{page}/{sort_by}/{sorting}", name="admin_respondents", requirements={"questionnaire_id"="\d+", "page"="\d+", "sort_by": "[a-zA-Z0-9_]+", "sorting": "asc|desc"})
   */
-  public function admin_respondents($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
-  {
+    public function admin_respondents($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
+    {
+        $this->admin_auth();
 
-      $this->admin_auth();
+        $people = $this->respondents_browse($questionnaire_id, $page, $sort_by, $sorting);
 
-      $people = $this->respondents_browse($questionnaire_id, $page, $sort_by, $sorting);
-
-      return $this->render('admin/table-admin.html.twig', array(
+        return $this->render('admin/table-admin.html.twig', array(
     'items' => $people,
     'pagination' => $this->pagination
     ));
-  }
+    }
 
     /**
     * @Route("/build/respondents/{questionnaire_id}/{page}/{sort_by}/{sorting}", name="browse_respondents", requirements={"questionnaire_id"="\d+", "page"="\d+", "sort_by": "[a-zA-Z0-9_]+", "sorting": "asc|desc"})
     */
     public function browse_respondents($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
     {
-
         if (!$this->member_auth(false)) {
             $this->admin_auth(true);
         }
@@ -40,22 +38,15 @@ class Admin extends Backend
       'items' => $people,
       'pagination' => $this->pagination
   ));
-  }
+    }
 
 
-  public function member_get($u)
+    public function member_get($u)
     {
         $u = new class {
         };
 
-        $custom_member_inc = $this->conf->base_path."custom/config_invite.php";
-
-        if (file_exists($custom_member_inc)) {
-            include_once($custom_member_inc);
-            if (function_exists('username_by_respondent_id')) {
-                $u->username = username_by_respondent_id($u->id);
-            }
-        }
+        $username = $this->username_by_respondent_id($this->respondent->id);
 
         if (!$u->username) {
             $u->error .= "Could not find the username. ";
@@ -95,24 +86,17 @@ class Admin extends Backend
 
                 $pw = $_REQUEST['password'];
 
-                $custom_member_inc = $this->conf->base_path."custom/config_invite.php";
-
-                if (file_exists($custom_member_inc)) {
-                    include_once($custom_member_inc);
-                    if (function_exists('username_by_respondent_id')) {
-                        $username = username_by_respondent_id($this->respondent->id);
-                    }
-                }
+                $username = $this->username_by_respondent_id($this->respondent->id);
 
                 if (!$username) {
                     $ret->error .= "Could not find the username. ";
                 }
 
                 if ($pw && $username) {
-                    if (function_exists('send_mastodon_account_email') && send_mastodon_account_email($email, $username, $pw)) {
+                    if ($this->send_account_email($email, $username, $pw)) {
                         $ret->account_email_sent = true;
                     } else {
-                        $ret->error .= "Error trying to send confirmation email. ";
+                        $ret->error .= "Error trying to send confirmation email (no custom email function). ";
                     }
                 } else {
                     $ret->error .= "The confirmation email could not be sent. (Make sure you include the new account's password in the request). ";
@@ -128,7 +112,6 @@ class Admin extends Backend
 
     public function respondents_browse($questionnaire_id, $page, $sort_by, $sorting)
     {
-
         $this->questionnaire_id = $questionnaire_id ? $questionnaire_id : $this->session->get('questionnaire'); // get from session
 
         // R::debug();
@@ -154,90 +137,110 @@ class Admin extends Backend
         $people = R::find('respondent', " questionnaire_id = ? AND email IS NOT NULL ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]); // list all
 
         if ($people) {
-
-          $paginator  = $this->get('knp_paginator');
-          $people = $paginator->paginate(
+            $paginator  = $this->get('knp_paginator');
+            $people = $paginator->paginate(
               $people, /* ideally query NOT result */
               $page/*page number*/,
               $per_page/*limit per page*/
           );
 
 
-          foreach ($people as $p) {
-            $responses = R::find('response', ' respondent_id = ?
+            foreach ($people as $p) {
+                $responses = R::find('response', ' respondent_id = ?
 		          ORDER BY response_ts ASC', [ $p->id ]);
 
-            foreach ($responses as $r) {
-                echo '<p>';
-                $c = $r->the_var ? $r->the_var : $r->answer->answer;
+                foreach ($responses as $r) {
+                    echo '<p>';
+                    $c = $r->the_var ? $r->the_var : $r->answer->answer;
 
-                $f = $r->question->question_name;
+                    $f = $r->question->question_name;
 
-                if ($f) {
-                    if ($f !='username' && $p->{$f} && $p->{$f} !=$c) {
-                        $p->{$f} .= ' ;<br> '  . $c;
-                    } else {
-                        $p->{$f} = $c;
+                    if ($f) {
+                        if ($f !='username' && $p->{$f} && $p->{$f} !=$c) {
+                            $p->{$f} .= ' ;<br> '  . $c;
+                        } else {
+                            $p->{$f} = $c;
+                        }
                     }
+
+                    unset($f, $c, $q_ok, $qid);
                 }
 
-                unset($f, $c, $q_ok, $qid);
-            }
+                if ($p->mastodon_id==1) {
+                    $p->status = 'probation';
+                }
 
-            if ($p->mastodon_id==1) {
-                $p->status = 'probation';
+                if ($p->status=='probation') {
+                    $p->status_class = 'info';
+                } elseif ($p->status=='invite') {
+                    $p->status_class = 'warning';
+                } elseif ($p->status=='full') {
+                    $p->status_class = 'success';
+                }
             }
-
-            if ($p->status=='probation') {
-                $p->status_class = 'info';
-            } elseif ($p->status=='invite') {
-                $p->status_class = 'warning';
-            } elseif ($p->status=='full') {
-                $p->status_class = 'success';
-            }
+            return $people;
         }
-        return $people;
     }
-  }
 
 
-  /**
-  * @Route("/admin/respondent/{respondent_id}/status/{status}", name="admin_status", requirements={"respondent_id"="\d+"} )
-  */
-  public function admin_status($respondent_id, $status)
+    /**
+    * @Route("/admin/respondent/{respondent_id}/status/{status}", name="admin_status_set", requirements={"respondent_id"="\d+"} )
+    */
+    public function admin_status_set($respondent_id, $status)
     {
+        $this->admin_auth();
 
-    	$this->admin_auth();
+        $this->respondent = $this->data_by_id('respondent', $respondent_id);
 
-      $this->respondent = $this->data_by_id( 'respondent', $respondent_id );
+        if (!$this->respondent) {
+            exit('respondent not found');
+        }
 
-    	if(!$this->respondent) exit('respondent not found');
+        $r = $this->response_by_question_id($this->conf->question_id_username, $this->respondent->id); // get username
 
-    	$r = $this->response_by_question_id(34, $this->respondent->id); // get username
+        if (!$r) {
+            $r = $this->response_by_question_id($this->conf->question_id_name, $this->respondent->id);
+        } // otherwise get name
 
-    	if(!$r) $r = $this->response_by_question_id(33, $this->respondent->id); // otherwise get name
+        if (!$r) {
+            exit('username not found');
+        }
 
-    	if(!$r) exit('username not found');
+        $uname = $r->the_var ? $r->the_var : $r->answer->answer;
 
-    	$uname = $r->the_var ? $r->the_var : $r->answer->answer;
+        if (!$uname) {
+            exit('no username found');
+        }
 
-    	if(!$uname) exit('no username found');
+        $uname_ok = $this->sanitize_string($uname);
 
-    	$uname_ok = $this->sanitize_string( $uname );
+        if (!$uname_ok) {
+            exit('username not valid');
+        }
 
-    	if(!$uname_ok) exit('username not valid');
+        $this->question = $this->question_get($this->conf->question_id_username); // needed by response_save() for saving sanitized username
+        if (!$this->question) {
+            exit('username not found in DB');
+        }
 
-      $this->question = $this->question_get(34); // needed by response_save() for saving sanitized username
-      if(!$this->question) exit('username not found in DB');
+        $respond['theVar'] = $uname_ok; // store
+        $response_ids[] = $this->response_save($respond);
 
-    	$respond['theVar'] = $uname_ok; // store
-    	$response_ids[] = $this->response_save($respond);
+        $this->respondent->status = $status;
+        R::store($this->respondent);
 
-    	$this->respondent->status = $status;
-    	R::store( $this->respondent );
+        exit("An account will be created with username: ".$uname_ok);
+    }
 
-    	exit("An account will be created with username: ".$uname_ok);
+    public function send_account_email($email, $username, $pw)
+    {
+        global $bv;
 
-  }
+        $custom_member_inc = $this->conf->base_path."custom/config_invite.php";
+        if (file_exists($custom_member_inc)) {
+            include_once($custom_member_inc);
+        }
 
+        return email_send($bv->message_welcome_subject, $email, $bv->message_welcome_subject);
+    }
 }

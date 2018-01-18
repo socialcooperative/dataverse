@@ -4,7 +4,7 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-
+use Mailgun\Mailgun;
 use RedBeanPHP\R;
 
 class App extends Controller
@@ -18,7 +18,10 @@ class App extends Controller
         $this->session = $session;
 
         global $bv;
-        if(!$bv) $bv = new class{};
+        if (!$bv) {
+            $bv = new class {
+            };
+        }
         $bv->base_path = $base_path = dirname(dirname(dirname(__FILE__))).'/';
 
         if (file_exists($bv->base_path.'custom/secrets.php')) {
@@ -50,6 +53,13 @@ class App extends Controller
         $this->db_tables->response = 'response';
         $this->db_tables->answer = 'answer';
         $this->col_prefix = "the";
+
+        if (!$this->conf->question_id_username) {
+            $this->conf->question_id_username = 34;
+        }
+        if (!$this->conf->question_id_username) {
+            $this->conf->question_id_name = 33;
+        }
 
         $this->answer_types = [
                 'Notice'=>'Show some text to the user',
@@ -127,7 +137,7 @@ class App extends Controller
 
         return $string;
     }
-    
+
 
     public function admin_auth($blocking = true, $token_type='admin_token')
     {
@@ -150,5 +160,22 @@ class App extends Controller
     public function member_auth($blocking = true)
     {
         return $this->admin_auth($blocking, 'members_token');
+    }
+
+    public function email_send($msg, $to, $subject=false)
+    {
+        global $bv;
+
+        # Instantiate the client.
+        $mgClient = new Mailgun($this->conf->mail->mailgun_key);
+
+        # Make the call to the client.
+        return $mgClient->sendMessage(
+        $this->conf->mail->domain,
+              array('from'	=> $this->conf->mail->from,
+                    'to'	  => $to,
+                    'subject' => $subject ? $subject : $this->conf->mail->subject_default,
+                    'html'	=> $msg)
+    );
     }
 }

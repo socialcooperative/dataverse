@@ -7,8 +7,6 @@ use RedBeanPHP\R;
 
 class Backend extends Frontend
 {
-
-
     public function question_delete($id)
     {
         if ($id && ($item = $this->data_by_id('question', $id))) {
@@ -46,8 +44,4 @@ class Backend extends Frontend
             R::store($step);
         }
     }
-
-
-
-
 }
