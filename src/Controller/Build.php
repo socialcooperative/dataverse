@@ -73,7 +73,7 @@ class Build extends Backend
             $this->session->set('questionnaire', $this->questionnaire->id);
 
             $popup = '<script type="text/javascript" src="'.$this->config->home_url.'/embed.js.php?id='.$this->questionnaire->id.'"></script><button onclick="return dataverse_open_form()" type="button">Open Questionnaire</button>';
-            $embed .= '<iframe style="height:500px; width:100%; border: none;" src="'.$this->config->home_url.'/question?embedded&amp;questionnaire='.$this->questionnaire->id.'&step=1"></iframe>';
+            $embed .= '<iframe style="height:500px; width:100%; border: none;" src="'.$this->config->home_url.'/q/'.$this->questionnaire->id.'?embedded&amp;step=1"></iframe>';
 
             $this->logger->info('.....questionnaire', [$this->questionnaire]);
 

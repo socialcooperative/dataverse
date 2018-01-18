@@ -127,6 +127,7 @@ class App extends Controller
 
         return $string;
     }
+    
 
     public function admin_auth($blocking = true, $token_type='admin_token')
     {

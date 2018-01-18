@@ -23,10 +23,10 @@
           <tr class="table-{{ it.status_class }}">
             <td>
               {% if it.status is null %}
-                <a href="/admin/custom.php?invite={{ it.id }}" class="btn btn-success btn-sm">Invite</a>
+                <a href="/admin/respondent/{{ it.id }}/status/invite" class="btn btn-success btn-sm">Invite</a>
               {% else %}
                 {{ it.status }}
-                <a href="/admin/custom.php?invite={{ it.id }}" class="btn btn-danger btn-sm">Re-Create</a>
+                <a href="/admin/respondent/{{ it.id }}/status/invite" class="btn btn-danger btn-sm">Re-Create</a>
               {% endif %}
               <!--{{ it.id }}-->
             </td>
@@ -58,7 +58,7 @@
   <div class="navigation float-right">
     {{ knp_pagination_render(items) }}
   </div>
-  
+
   {% else %}
     <p>No items found.</p>
   {% endif %}

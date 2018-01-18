@@ -150,7 +150,7 @@ class Frontend extends App
                 } elseif ($this->answer_type=='MapLocation') {
                     $col_name = 'Point';
                     $geo_col = $this->db_tables->response.'.'.$this->col_prefix.'_'.'point';
-                    R::bindFunc('read', $geo_col, 'asText');
+                    // R::bindFunc('read', $geo_col, 'asText'); // TODO
                     R::bindFunc('write', $geo_col, 'GeomFromText');
                     $point_num = str_replace(',', ' ', $value);
                     $value = "POINT($point_num)";
@@ -424,7 +424,7 @@ class Frontend extends App
     public function response_by_question_id($question_id, $respondent_id)
     {
         $geo_col = $this->db_tables->response.'.'.$this->col_prefix.'_'.'point';
-        R::bindFunc('read', $geo_col, 'asText');
+        // R::bindFunc('read', $geo_col, 'asText'); // TODO
         return R::findOne($this->db_tables->response, ' question_id = ? AND  respondent_id = ? ORDER BY response_ts DESC ', [ $question_id, $respondent_id ]);
     }
 
