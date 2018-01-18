@@ -241,6 +241,6 @@ class Admin extends Backend
             include_once($custom_member_inc);
         }
 
-        return email_send($bv->message_welcome_subject, $email, $bv->message_welcome_subject);
+        return email_send($bv->message_welcome_body, $email, $bv->message_welcome_subject);
     }
 }
