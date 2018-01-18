@@ -4,10 +4,10 @@ namespace App\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
-class BackendAPI extends Backend
+class API extends Admin
 {
     /**
-    * @Route("/admin/api/members", name="api_members")
+    * @Route("/api/members", name="api_members")
     */
     public function members(Request $request)
     {
@@ -28,7 +28,7 @@ class BackendAPI extends Backend
     }
 
     /**
-    * @Route("/admin/api/member", methods={"GET"}, name="api_member")
+    * @Route("/api/member", methods={"GET"}, name="api_member")
     */
     public function member(Request $request)
     {
@@ -51,7 +51,7 @@ class BackendAPI extends Backend
     }
 
     /**
-    * @Route("/admin/api/member", methods={"POST","PUT"}, name="api_member_edit")
+    * @Route("/api/member", methods={"POST","PUT"}, name="api_member_edit")
     */
     public function member_edit(Request $request)
     {
