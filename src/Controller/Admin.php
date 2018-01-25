@@ -62,16 +62,16 @@ class Admin extends Backend
         return $u;
     }
 
-    public function member_update($respondent)
+    public function member_update($member)
     {
         $status = $_REQUEST['status'];
         $ret = new class {
         };
 
-        $ret = $this->respondent = $respondent;
+        $ret = (object) $member;
 
-        if (!$this->respondent) {
-            $ret->error = "No such member found. ";
+        if (!$member || !$this->respondent) {
+            $ret->error = "No matching member found. ";
         } elseif ($status) { // update status
 
             if ($status=='created') {
@@ -79,20 +79,14 @@ class Admin extends Backend
 
                 $pw = $_REQUEST['password'];
 
-                $ret->username = $this->username_by_respondent_id($this->respondent->id);
-
-                if (!$ret->username) {
-                    $ret->error .= "Could not find the username";
-                }
-
-                if ($pw && $ret->username) {
-                    if ($this->send_account_email($email, $ret->username, $pw)) {
+                if ($pw && $member->username) {
+                    if ($this->send_account_email($member->email, $member->username, $pw)) {
                         $ret->account_email_sent = true;
                     } else {
                         $ret->error .= "Error trying to send confirmation email (no custom email function). ";
                     }
                 } else {
-                    $ret->error .= "The confirmation email could not be sent. (Make sure you include the new account's password in the request). ";
+                    $ret->error .= "A confirmation email was not sent. (Make sure you include the new account's password in the request). ";
                 }
             }
 
@@ -234,6 +228,6 @@ class Admin extends Backend
             include_once($custom_member_inc);
         }
 
-        return email_send($bv->message_welcome_body, $email, $bv->message_welcome_subject);
+        if($bv->message_welcome_body) return $this->email_send($bv->message_welcome_body, $email, $bv->message_welcome_subject);
     }
 }

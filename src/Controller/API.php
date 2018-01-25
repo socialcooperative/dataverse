@@ -73,9 +73,9 @@ class API extends Admin
     {
         $this->admin_auth();
 
-        $this->respondent = respondent_lookup($lookup);
+        $ret = $this->respondent_lookup($lookup);
 
-        $ret = $this->member_update($this->respondent);
+        if($_REQUEST['status'] || $_REQUEST['password']) $ret = $this->member_update($ret->member);
 
         return $this->json($ret);
     }
