@@ -2,7 +2,7 @@
 include_once('../custom/secrets.php');
 global $bv;
 
-$return = array();
+$return['results'] = array();
 $term   = $_GET['q']; 
 $i = 0;
 
