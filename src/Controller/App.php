@@ -68,6 +68,7 @@ class App extends Controller
                 'Choice'=>'Choice from a list',
                 'Dropdown'=>'Choice from a list (dropdown)',
                 'MultipleChoices'=>'Multiple choices from a list',
+                'Tag'=>'Tag (free input, or choice from a list of previous answers)',
                 'Email'=>'Email address',
                 'Phone'=>'Phone number',
                 'URL'=>'Webpage / URL',

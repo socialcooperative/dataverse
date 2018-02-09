@@ -453,6 +453,10 @@ class Form extends Frontend
 //				]));
 
                 break;
+//            case "Tag":
+//                $dropdown=true;
+            
+                // no break
             case "Dropdown":
                 $dropdown=true;
 
@@ -613,6 +617,16 @@ class Form extends Frontend
                 $form_builder->add($this->sanitize_string($this->field_name), FormCustomCode::class, $this->field_params([
                     // 'data' => $this->field_label,
                     // 'html'	  => $this->output_after
+                ]));
+
+                break;
+            case "Tag":
+
+                $this->attr['class'] .= ' form_tag';
+
+                $form_builder->add($this->field_name, ChoiceType::class, $this->field_params([
+                    //'choice_value' => '',
+                    'placeholder' => 'Select a tag',
                 ]));
 
                 break;

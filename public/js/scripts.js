@@ -53,6 +53,19 @@ $(document).ready(function() {
     allowClear: true,
     placeholder: "Start typing your language & select it"
   });
+  
+  $(".form_tag").select2({
+    ajax: {
+      url: "/tags.php?via=select2",
+      dataType: 'json',
+      delay: 250,
+      cache: true
+    },
+    minimumInputLength: 1,
+    tags: true,
+    allowClear: true,
+    placeholder: "Start typing your tags & select from the suggestions"
+  });
 
   //  the following simple make textboxes "Auto-Expand" when typed in
   $("textarea").keyup(function(e) {
