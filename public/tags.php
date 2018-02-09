@@ -6,8 +6,8 @@ $return['results'] = array();
 $term   = $_GET['q']; 
 $i = 0;
 
-if ($term && ($file = fopen(__DIR__.'/../custom/tags.csv', 'r')) !== FALSE) {
-    while (($row = fgetcsv($file)) !== FALSE) {
+if ($term && ($file = fopen(__DIR__.'/../custom/tags.tsv', 'r')) !== FALSE) {
+    while (($row = fgetcsv($file, 5000, "\t")) !== FALSE) {
     	
     	$id = $row[1] ? $row[0] : $i;
     	$val = $row[1] ? $row[1] : $row[0];
