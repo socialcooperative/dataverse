@@ -627,6 +627,7 @@ class Form extends Frontend
                 $form_builder->add($this->field_name, ChoiceType::class, $this->field_params([
                     //'choice_value' => '',
                     'placeholder' => 'Select a tag',
+                    'multiple' => true,
                 ]));
 
                 break;
