@@ -61,7 +61,7 @@ $(document).ready(function() {
       delay: 250,
       cache: true
     },
-    minimumInputLength: 1,
+    minimumInputLength: 3,
     tags: true,
     allowClear: true,
     placeholder: "Start typing your tags & select from the suggestions"
