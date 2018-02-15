@@ -6,16 +6,21 @@ $return['results'] = array();
 $term   = $_GET['q']; 
 $i = 0;
 
+header('Content-Type: application/json');
+
 if ($term && ($file = fopen(__DIR__.'/../custom/tags.tsv', 'r')) !== FALSE) {
-    while (($row = fgetcsv($file, 5000, "\t")) !== FALSE) {
+    
+    while (($val = fgets($file)) !== false) {
+//  while (($row = fgetcsv($file, 5000, "\t")) !== FALSE) {
+    
+//    	print_r($val);
+//    	$id = $row[1] ? $row[0] : $i;
+//    	$val = $row[1] ? $row[1] : $row[0];
     	
-    	$id = $row[1] ? $row[0] : $i;
-    	$val = $row[1] ? $row[1] : $row[0];
-    	
-        if (preg_match("/^$term| $term/i", $val)){ 
-            $return['results'][] = array('id'=>$id,'text'=>$val);
+        if (preg_match("/^$term|	$term| $term/i", $val)){ 
+            $return['results'][] = array('id'=>$val,'text'=>$val);
             $i++;
-            if($i>100) break;
+            if($i>500) break;
         }
     }
 
