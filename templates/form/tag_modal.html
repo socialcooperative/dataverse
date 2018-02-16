@@ -25,9 +25,10 @@
 	
 	$('a.taxonomy').click(function () {
 	    var item = $('select.fieldtype-Tag option:last').val();
-	    console.log(item);
-	    if(item) var src = '/needs_browser?item='+item;
-	    else var src = '/needs_browser';
+//	    console.log(item);
+//	    if(item) var src = '/needs_browser?item='+item;
+//	    else 
+	    	var src = '/needs_browser';
 	    $("#taxonomy_browse").attr('src', src);
 	    $('#taxonomy_modal').modal('show');
 	    return false;
