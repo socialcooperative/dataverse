@@ -471,6 +471,16 @@ class Form extends Frontend
                     //print_r($s);
                     $choices[$s->answer] = $s->id;
                 }
+                
+                
+                global $bv;
+//                var_dump($this->field_name);
+                if($bv->preload_choices[$this->field_name]){
+                	foreach ($bv->preload_choices[$this->field_name] as $id=>$val) {
+                	    //print_r($s);
+                	    $choices[$val] = $id;
+                	}
+                }
 
                 if ($dropdown) {
                     $this->attr['class'] .= ' select2';
@@ -611,7 +621,7 @@ class Form extends Frontend
             case "Include":
 
                 $html = '<div class="form-group" id="'.$this->field_name.'">
-				' . $this->get_include('custom/'.$this->field_name).'</div>';
+				' . $this->get_include('public_pages/'.$this->field_name).'</div>';
                 $this->attr['html'] = $html;
 
                 $form_builder->add($this->sanitize_string($this->field_name), FormCustomCode::class, $this->field_params([

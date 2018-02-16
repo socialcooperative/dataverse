@@ -91,7 +91,7 @@ class App extends Controller
                 'UploadDoc'=>'Upload Document',
                 'UploadFile'=>'Upload Any File',
                 'Sortable'=>'Sortable List',
-                'Include'=>'Embed PHP Script from server /custom/ directory',
+                'Include'=>'Embed PHP Script from server /public_pages/ directory',
             ];
     }
 
