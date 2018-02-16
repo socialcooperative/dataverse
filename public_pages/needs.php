@@ -3,14 +3,14 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>Taxonomy browser</title>
-	
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<title>Taxonomy Browser</title>
 
 </head>
 
 <body>
+	
+	<h3>Needs & Offers Taxonomy <?=($_GET['parent'] ? ' > '.$_GET['parent'] : '')?> <?=($_GET['item'] ? ' > '.$_GET['item'] : '')?></h3>
+	
 	<?php
     include_once("needs_browser.php");
     ?>

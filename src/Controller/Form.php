@@ -623,6 +623,9 @@ class Form extends Frontend
             case "Tag":
 
                 $this->attr['class'] .= ' form_tag';
+                
+//                $this->output_before = "<a href='/needs' class='btn btn-info'>Browse the Needs/Offers Taxonomy</a>";
+                $this->output_before .= $this->get_include('templates/form/tag_modal.html');
 
                 $form_builder->add($this->field_name, ChoiceType::class, $this->field_params([
                     //'choice_value' => '',

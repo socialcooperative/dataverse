@@ -1,7 +1,9 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
 <script src="/js/d3.v4.min.js"></script>
 <link rel="stylesheet" type="text/css" href="/css/sequences.css" />
 
-<h3>Needs & Offers Taxonomy <?=($_GET['parent'] ? ' > '.$_GET['parent'] : '')?> <?=($_GET['item'] ? ' > '.$_GET['item'] : '')?></h3>
 <?=($_GET['item'] ? '<a class="btn btn-info float-right" href="?">Back to top categories</a> ' : '')?>
 <p>Click on an any of the items to view more detailed sub-categories and tags.</p>
 
