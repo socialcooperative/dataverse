@@ -5,10 +5,12 @@ global $bv;
 $return['results'] = array();
 $term   = $_GET['q']; 
 $i = 0;
+$fpath = __DIR__.'/../custom/tags.tsv';
+//echo $fpath;
 
 header('Content-Type: application/json');
 
-if ($term && ($file = fopen(__DIR__.'/../custom/tags.tsv', 'r')) !== FALSE) {
+if ($term && ($file = fopen($fpath, 'r')) !== FALSE) {
     
     while (($val = fgets($file)) !== false) {
 //  while (($row = fgetcsv($file, 5000, "\t")) !== FALSE) {

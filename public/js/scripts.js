@@ -56,7 +56,7 @@ $(document).ready(function() {
   
   $(".form_tag").select2({
     ajax: {
-      url: "/tags.php?via=select2",
+      url: "/tags?via=select2",
       dataType: 'json',
       delay: 250,
       cache: true
