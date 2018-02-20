@@ -106,6 +106,60 @@ class App extends Controller
         include($this->conf->base_path.$file);
         return ob_get_clean();
     }
+    
+    public function data_by_id($table, $id)
+    {
+        return R::load($table, $id);
+    }
+    
+    public function item_save($table_name = 'item', $data = [], $custom_linked_items=false)
+    { // save object in DB, with support for many to many for items with array of data
+
+
+        $this->logger->info('item_save', [$table_name, $data]);
+
+        if (!$this->item) {
+            $this->item = R::dispense($table_name);
+        }
+
+        // if(!is_array($data)) $data = (array) $data; // make sure we are dealing with an array
+        $this->logger->info('item_save()', $data);
+
+        foreach ($data as $key => $value) {
+            // var_dump('item foreach', $key , $value, is_array($value), count($value));
+
+            if (is_array($value)) { // multiple items - use linked table
+
+                if (count($value)>0) {
+                    
+                            if ($custom_linked_items) { // we're already getting Redbean objects
+
+                                $linked_ref = 'shared'.ucwords($custom_linked_items).'List';
+                                $this->item->{$linked_ref} = $value; // store relation
+                                
+                            } else {
+                            
+                                $linked_ref = 'shared'.ucwords($key).'List';
+
+                                foreach ($value as $linked_value) { // sub-array
+                                    if ($linked_value) {
+                                        $linked_item = R::dispense($key); // init linked table
+                                        $linked_item->$key = $linked_value;
+                                        R::store($linked_item);
+
+                                        $this->item->{$linked_ref}[] = $linked_item; // store relation
+                                    }
+                                }
+                            }
+                }
+            } else {
+                $this->item->$key = $value;
+            } // standard field
+        }
+        // error_log($this->item);
+
+        return R::store($this->item);
+    }
 
 
     /**

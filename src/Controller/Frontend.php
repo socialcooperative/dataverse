@@ -5,63 +5,10 @@ use RedBeanPHP\R;
 
 class Frontend extends App
 {
-    public function data_by_id($table, $id)
-    {
-        return R::load($table, $id);
-    }
 
     public function field_params($params=[])
     {
         return array_merge($this->field_params, ['label' => $this->field_label, 'attr' => $this->attr, 'data' => $this->field_value], $params);
-    }
-
-    public function item_save($table_name = 'item', $data = [], $custom_linked_items=false)
-    { // save object in DB, with support for many to many for items with array of data
-
-
-        $this->logger->info('item_save', [$table_name, $data]);
-
-        if (!$this->item) {
-            $this->item = R::dispense($table_name);
-        }
-
-        // if(!is_array($data)) $data = (array) $data; // make sure we are dealing with an array
-        // print_r($data);
-        $this->logger->info('item_save()', $data);
-
-        foreach ($data as $key => $value) {
-            // var_dump('item foreach', $key , $value, is_array($value));
-
-            if (is_array($value)) { // multiple items - use linked table
-                // error_log('arr');
-
-                if (count($value)>0) {
-                    // error_log('>0');
-                            if ($custom_linked_items) { // we're already getting Redbean objects
-
-                                $linked_ref = 'shared'.ucwords($custom_linked_items).'List';
-                                $this->item->{$linked_ref} = $value; // store relation
-                            } else {
-                                $linked_ref = 'shared'.ucwords($key).'List';
-
-                                foreach ($value as $linked_value) { // sub-array
-                                    if ($linked_value) {
-                                        $linked_item = R::dispense($key); // init linked table
-                                        $linked_item->$key = $linked_value;
-                                        R::store($linked_item);
-
-                                        $this->item->{$linked_ref}[] = $linked_item; // store relation
-                                    }
-                                }
-                            }
-                }
-            } else {
-                $this->item->$key = $value;
-            } // standard field
-        }
-        // error_log($this->item);
-
-        return R::store($this->item);
     }
 
     public function respondent_questions_responses_save($data)
