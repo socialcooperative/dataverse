@@ -144,8 +144,8 @@ class Frontend extends App
                     $response_ids[] = $this->answer_response_save($answer, $respond); // save Price & currency ID
 
                     $this->response_save_custom($value); // amount
-
                     $this->response_save_custom($this->currency, 'currency'); // currency code
+                    
                 } elseif ($col_name && !$try_by_id) { // simply store in appropriate column of response table
 
                     $respond[$col_name] = $value; // store
@@ -177,6 +177,7 @@ class Frontend extends App
                     }
 
                     $this->response_save_custom($answers);
+                    
                 } else { // store (single answer) in answer table
 
                     if ($value) {
@@ -289,13 +290,13 @@ class Frontend extends App
                 $data_a['respondent'] = $this->respondent;
                 $data_a['updated_ts'] = $this->response->response_ts;
 
-                return $this->item_save($this->questionnaire->questionnaire_name, $data_a, 'answer');
+                return $this->item_save($this->questionnaire->questionnaire_name, $data_a, ['answer'=>'answer']);
             }
 
             //exit($id);
             return $id;
         } catch (Exception $e) {
-            $this->logger->error('Could not save a response (probably duplicate', [$e]);
+            $this->logger->error('Could not save a response (probably duplicate)', [$e]);
             // TODO
         }
     }
@@ -339,9 +340,9 @@ class Frontend extends App
         return $this->data_by_id($this->db_tables->respondent, $id);
     }
 
-    public function respondent_find($val, $field='email')
+    public function respondent_find($value, $field='email')
     {
-        return R::findOne($this->db_tables->respondent, $field.' = ? ', [ $val ]);
+        return $this->get_by_field($this->db_tables->respondent, $field, $value);
     }
 
     public function answer_get($id)
@@ -351,7 +352,7 @@ class Frontend extends App
 
     public function answer_find($value)
     {
-        return R::findOne('answer', ' answer LIKE ? ', [ $value ]);
+        return $this->get_like_field('answer', 'answer', $value);
     }
 
     public function data_by_respondent($table, $respondent_id)
@@ -373,7 +374,7 @@ class Frontend extends App
 
     public function a_respondent_by_status($status)
     {
-        return R::findOne($this->db_tables->respondent, ' status = ? ', [ $status ]);
+        return $this->get_like_field($this->db_tables->respondent, 'status', $status);
     }
 
     public function questionnaire_steps($id)
