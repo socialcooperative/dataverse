@@ -148,19 +148,18 @@ function createVisualization(json) {
 //		d3.select("#knowledge_center").style("visibility", "hidden");
 
 		//		node = d;
-		
-		console.log('go',d);
-		
-//		if(select_id){
-		if(d.depth > 0 && d.height < 2){
-			
-			window.location = '?parent=' + encodeURIComponent(d.parent.data.name) + '&item='+encodeURIComponent(d.data.name);
 
-		} else {
-			path.transition()
-				.duration(1000)
-				.attrTween("d", arcTweenZoom(d));
-		}
+		console.log('go',d);
+
+		// if(d.depth > 0 && d.height < 2){
+
+			window.location = '?tag_id=' + encodeURIComponent(d.data.id) + '&tag_label='+encodeURIComponent(d.data.name);
+
+		// } else {
+		// 	path.transition()
+		// 		.duration(1000)
+		// 		.attrTween("d", arcTweenZoom(d));
+		// }
 	}
 
 	// path.transition().duration(1000).attrTween("d", arcTweenData);
@@ -323,7 +322,7 @@ function updateBreadcrumbs(nodeArray) {
 
 	entering.append("a")
 		.attr("xlink:href", function(d) {
-			return '?parent=' + encodeURIComponent(d.parent.data.name) + '&item='+encodeURIComponent(d.data.name);
+			return '?tag_id=' + encodeURIComponent(d.data.id) + '&tag_label='+encodeURIComponent(d.data.name);
 		})
 //		.attr("target", '_blank')
 		.append("svg:text")
@@ -355,12 +354,12 @@ function updateBreadcrumbs(nodeArray) {
 	//     .attr("dy", "0.35em")
 	//     .attr("text-anchor", "left")
 	//     .text(description);
-	
+
 	d3.select(".knowledge_name").text(k_name);
 
 	if (k_description != old_description)
 		d3.select("#knowledge_description").html(k_description);
-	
+
 	// Make the breadcrumb trail visible, if it's hidden.
 	//  d3.select("#knowledge_trail")
 	//      .style("visibility", "");
