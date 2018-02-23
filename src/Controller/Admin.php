@@ -62,19 +62,19 @@ class Admin extends Backend
         return $u;
     }
 
-    public function member_update($member)
+    public function member_update($member, $status = false)
     {
-        $status = $_REQUEST['status'];
+        if(!$status) $status = $_REQUEST['status'];
+
         $ret = new class {
         };
-
-        $ret = (object) $member;
+        $ret = clone $member;
 
         if (!$member || !$this->respondent) {
             $ret->error = "No matching member found. ";
         } elseif ($status) { // update status
 
-            if ($status=='created') {
+            if ($status=='created') { // deprecate
                 $ret->account_email_sent = false;
 
                 $pw = $_REQUEST['password'];
@@ -83,10 +83,25 @@ class Admin extends Backend
                     if ($this->send_account_email($member->email, $member->username, $pw)) {
                         $ret->account_email_sent = true;
                     } else {
-                        $ret->error .= "Error trying to send confirmation email (no custom email function). ";
+                        $ret->error .= "Error trying to send confirmation email. ";
                     }
                 } else {
                     $ret->error .= "A confirmation email was not sent. (Make sure you include the new account's password in the request). ";
+                }
+            }
+
+            if ($status=='invite') { // new invite-based system
+                $ret->account_email_sent = false;
+
+                if ($member->username && $member->email) {
+                    if (($send = $this->send_account_email($member->email, $member->username))) {
+                        $ret->account_email_sent = true;
+                        $status = 'invited';
+                    } else {
+                        $ret->error .= "Error trying to send confirmation email. ";
+                    }
+                } else {
+                    $ret->error .= "A confirmation email was not sent. (User email or username not found). ";
                 }
             }
 
@@ -153,14 +168,12 @@ class Admin extends Backend
                     unset($f, $c, $q_ok, $qid);
                 }
 
-                if ($p->mastodon_id==1) {
-                    $p->status = 'probation';
-                }
-
                 if ($p->status=='probation') {
-                    $p->status_class = 'info';
+                    $p->status_class = 'danger';
                 } elseif ($p->status=='invite') {
                     $p->status_class = 'warning';
+                } elseif ($p->status=='invited') {
+                    $p->status_class = 'info';
                 } elseif ($p->status=='full') {
                     $p->status_class = 'success';
                 }
@@ -183,43 +196,51 @@ class Admin extends Backend
             exit('respondent not found');
         }
 
-        $r = $this->response_by_question_id($this->conf->question_id_username, $this->respondent->id); // get username
+        if($status=='invite'){ // clean up / prepare username
 
-        if (!$r) {
-            $r = $this->response_by_question_id($this->conf->question_id_name, $this->respondent->id);
-        } // otherwise get name
+          $uname = $this->username_by_respondent_id($this->respondent->id);
 
-        if (!$r) {
-            exit('username not found');
+          if (!$uname) { // otherwise get name
+              $r = $this->response_by_question_id($this->conf->question_id_name, $this->respondent->id);
+              $uname = $r->the_var ? $r->the_var : $r->answer->answer;
+          }
+
+          if (!$uname) {
+              exit('no username or name found');
+          }
+
+          $uname_ok = $this->sanitize_string($uname);
+
+          if (!$uname_ok) {
+              exit('username not valid');
+          }
+
+          $this->question = $this->question_get($this->conf->question_id_username); // needed by response_save() for saving sanitized username
+          if (!$this->question) {
+              exit('username field not found in DB');
+          }
+
+          $this->respondent->username = $uname_ok; // save in respondent table
+
+          $respond['theVar'] = $uname_ok; // store
+          $response_ids[] = $this->response_save($respond);
         }
-
-        $uname = $r->the_var ? $r->the_var : $r->answer->answer;
-
-        if (!$uname) {
-            exit('no username found');
-        }
-
-        $uname_ok = $this->sanitize_string($uname);
-
-        if (!$uname_ok) {
-            exit('username not valid');
-        }
-
-        $this->question = $this->question_get($this->conf->question_id_username); // needed by response_save() for saving sanitized username
-        if (!$this->question) {
-            exit('username not found in DB');
-        }
-
-        $respond['theVar'] = $uname_ok; // store
-        $response_ids[] = $this->response_save($respond);
 
         $this->respondent->status = $status;
         R::store($this->respondent);
 
-        exit("An account will be created with username: ".$uname_ok);
+        if($status=='invite' && ($mu = $this->member_update($this->respondent, $status))){
+
+          if($mu->error) echo($mu->error);
+          else echo("An invitation was sent for an account with username: @".$uname_ok);
+          // print_r($mu);
+          exit();
+        }
+
+        else exit("An account is pending to be created with username: @".$uname_ok);
     }
 
-    public function send_account_email($email, $username, $pw)
+    public function send_account_email($email, $username, $pw=false)
     {
         global $bv;
 
@@ -228,6 +249,7 @@ class Admin extends Backend
             include_once($custom_member_inc);
         }
 
-        if($bv->message_welcome_body) return $this->email_send($bv->message_welcome_body, $email, $bv->message_welcome_subject);
+        if($pw && $bv->message_welcome_body) return $this->email_send($bv->message_welcome_body, $email, $bv->message_welcome_subject); // deprecate
+        elseif($bv->message_invite_body) return $this->email_send($bv->message_invite_body, $email, $bv->message_invite_subject); // new invite system
     }
 }
