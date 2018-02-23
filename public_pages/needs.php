@@ -8,9 +8,9 @@
 </head>
 
 <body>
-	
-	<h3>Needs & Offers Taxonomy <?=($_GET['parent'] ? ' > '.$_GET['parent'] : '')?> <?=($_GET['item'] ? ' > '.$_GET['item'] : '')?></h3>
-	
+
+	<h3>Needs & Offers Taxonomy <?=($_GET['tag_label'] ? ' > '.$_GET['tag_label'] : '')?></h3>
+
 	<?php
     include_once("needs_browser.php");
     ?>

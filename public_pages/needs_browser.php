@@ -4,7 +4,7 @@
 <script src="/js/d3.v4.min.js"></script>
 <link rel="stylesheet" type="text/css" href="/css/sequences.css" />
 
-<?=($_GET['item'] ? '<a class="btn btn-info float-right" href="?">Back to top categories</a> ' : '')?>
+<?=($_GET['tag_id'] ? '<a class="btn btn-info float-right" href="?">Back to top categories</a> ' : '')?>
 <p>Click on an any of the items to view more detailed sub-categories and tags.</p>
 
 <div id="knowledge_browser">
@@ -34,7 +34,11 @@
 <script type="text/javascript">
 // Hack to make this example display correctly in an iframe
 d3.select(self.frameElement).style("height", "700px");
-var select_id = "<?=$_GET['item']?>";
-var json_url = "/needs_json?parent=<?=urlencode($_GET['parent'])?>&item=<?=urlencode($_GET['item'])?>";
+var select_id = "<?=$_GET['tag_id']?>";
+
+// var json_url = "/needs_json?parent=<?=urlencode($_GET['parent'])?>&item=<?=urlencode($_GET['item'])?>";
+
+var json_url = "/taxonomy/2/tag/<?=($_GET['tag_id'] ? intval($_GET['tag_id']) : 3)?>?output=tree&format=json";
+
 </script>
 <script type="text/javascript" src="/js/needs.js"></script>
