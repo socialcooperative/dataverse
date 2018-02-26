@@ -66,9 +66,8 @@ class App extends Controller
                 'ShortText'=>'Text (short)',
                 'LongText'=>'Text (long)',
                 'Choice'=>'Choice from a list',
-                'Dropdown'=>'Choice from a dropdown',
+                'Dropdown'=>'Choice from a list (dropdown)',
                 'MultipleChoices'=>'Multiple choices from a list',
-                'DropdownMultiple'=>'Multiple choices from a dropdown',
                 'Tag'=>'Tag (free input, or choice from a list of previous answers)',
                 'Email'=>'Email address',
                 'Phone'=>'Phone number',
@@ -92,7 +91,7 @@ class App extends Controller
                 'UploadDoc'=>'Upload Document',
                 'UploadFile'=>'Upload Any File',
                 'Sortable'=>'Sortable List',
-                'Include'=>'Embed PHP Script from server /public_pages/ directory',
+                'Include'=>'Embed PHP Script from server /custom/ directory',
             ];
     }
 
@@ -106,90 +105,6 @@ class App extends Controller
         ob_start();
         include($this->conf->base_path.$file);
         return ob_get_clean();
-    }
-
-    public function data_by_id($table, $id)
-    {
-        return R::load($table, $id);
-    }
-
-    public function get_by_field($table, $field, $value)
-    {
-        return R::findOne($table, $field.' = ? ', [ $value ]);
-    }
-
-    public function get_like_field($table, $field, $value)
-    {
-        return R::findOne($table, $field.' LIKE ? ', [ $value ]);
-    }
-
-    public function item_save($table_name = 'item', $data = [], $custom_linked_table=[], $custom_linked_labels=[])
-    { // save object in DB, with support for many to many for items with array of data
-
-
-        $this->logger->info('item_save', [$table_name, $data]);
-
-        if (!$this->item) {
-            $this->item = R::dispense($table_name);
-        }
-
-         if(!is_array($data)) $data = (array) $data; // make sure we are dealing with an array
-        //$this->logger->info('item_save()', $data);
-
-        foreach ($data as $key => $value) {
-            // var_dump('item foreach', $key , $value, is_array($value), count($value));
-
-            if (is_array($value)) { // multiple items - use linked table
-
-                if (count($value)>0) {
-
-                    if($custom_linked_table[$key]) $linked_ref = 'shared'.ucwords($custom_linked_table[$key]).'List';
-                    elseif($key==$table_name) $linked_ref = 'own'.ucwords($key).'List'; // self-referential
-                    else $linked_ref = 'shared'.ucwords($key).'List'; // many-to-many
-
-                    if ($value->id || current($value)->id) { // we're already being passed an array of Redbean objects
-
-                        $this->item->{$linked_ref} = $value; // store relation
-
-                    } else { // create linked entries for each of the array of values
-
-                        foreach ($value as $linked_value) { // sub-array
-                            if ($linked_value) {
-
-//                                $linked_item = R::dispense($key); // init linked table
-
-                                if (is_array($linked_value)) { // multiple cols
-
-                                	foreach ($linked_value as $linked_col =>$linked_col_val) {
-
-//                                		$linked_item->$linked_col = $linked_col_val;
-                                		$linked_data[$linked_col] = $linked_col_val;
-                                	}
-
-                                } else { // single val
-
-                                	$label_field = $custom_linked_labels[$key] ? $custom_linked_labels[$key] : $key; // name of column
-
-//                                	$linked_item->$label_field = $linked_value;
-                                	$linked_data[$label_field] = $linked_value;
-                                }
-
-//                                R::store($linked_item);
-
-								$linked_item = R::findOrCreate( $key, $linked_data );
-
-                                $this->item->{$linked_ref}[] = $linked_item; // store relation
-                            }
-                        }
-                    }
-                }
-            } else {
-                $this->item->$key = $value;
-            } // standard field
-        }
-        // error_log($this->item);
-
-        return R::store($this->item);
     }
 
 

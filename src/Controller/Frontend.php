@@ -5,14 +5,63 @@ use RedBeanPHP\R;
 
 class Frontend extends App
 {
+    public function data_by_id($table, $id)
+    {
+        return R::load($table, $id);
+    }
+
     public function field_params($params=[])
     {
         return array_merge($this->field_params, ['label' => $this->field_label, 'attr' => $this->attr, 'data' => $this->field_value], $params);
     }
 
-    public function usort_by_ts_added($a, $b)
-    {
-        return strcmp($a->ts_added, $b->ts_added);
+    public function item_save($table_name = 'item', $data = [], $custom_linked_items=false)
+    { // save object in DB, with support for many to many for items with array of data
+
+
+        $this->logger->info('item_save', [$table_name, $data]);
+
+        if (!$this->item) {
+            $this->item = R::dispense($table_name);
+        }
+
+        // if(!is_array($data)) $data = (array) $data; // make sure we are dealing with an array
+        // print_r($data);
+        $this->logger->info('item_save()', $data);
+
+        foreach ($data as $key => $value) {
+            // var_dump('item foreach', $key , $value, is_array($value));
+
+            if (is_array($value)) { // multiple items - use linked table
+                // error_log('arr');
+
+                if (count($value)>0) {
+                    // error_log('>0');
+                            if ($custom_linked_items) { // we're already getting Redbean objects
+
+                                $linked_ref = 'shared'.ucwords($custom_linked_items).'List';
+                                $this->item->{$linked_ref} = $value; // store relation
+                            } else {
+                                $linked_ref = 'shared'.ucwords($key).'List';
+
+                                foreach ($value as $linked_value) { // sub-array
+                                    if ($linked_value) {
+                                        $linked_item = R::dispense($key); // init linked table
+                                        $linked_item->$key = $linked_value;
+                                        R::store($linked_item);
+
+                                        $this->item->{$linked_ref}[] = $linked_item; // store relation
+                                    }
+                                }
+                            }
+                }
+            } else {
+                $this->item->$key = $value;
+            } // standard field
+        }
+        // error_log($this->item);
+
+        return R::store($this->item);
     }
 
     public function respondent_questions_responses_save($data)
@@ -94,9 +143,6 @@ class Frontend extends App
                 } elseif ($this->answer_type=='Email') { // save email in main 'respondent' table
                     $this->respondent->email = $value;
                     R::store($this->respondent);
-
-                    $this->session->set('respondent_email', $value); // save in cookie
-
                     $col_name = 'Var';
                 } elseif ($this->answer_type=='MapLocation') {
                     $col_name = 'Point';
@@ -151,6 +197,7 @@ class Frontend extends App
                     $response_ids[] = $this->answer_response_save($answer, $respond); // save Price & currency ID
 
                     $this->response_save_custom($value); // amount
+
                     $this->response_save_custom($this->currency, 'currency'); // currency code
                 } elseif ($col_name && !$try_by_id) { // simply store in appropriate column of response table
 
@@ -295,13 +342,13 @@ class Frontend extends App
                 $data_a['respondent'] = $this->respondent;
                 $data_a['updated_ts'] = $this->response->response_ts;
 
-                return $this->item_save($this->questionnaire->questionnaire_name, $data_a, ['answer'=>'answer']);
+                return $this->item_save($this->questionnaire->questionnaire_name, $data_a, 'answer');
             }
 
             //exit($id);
             return $id;
         } catch (Exception $e) {
-            $this->logger->error('Could not save a response (probably duplicate)', [$e]);
+            $this->logger->error('Could not save a response (probably duplicate', [$e]);
             // TODO
         }
     }
@@ -345,9 +392,9 @@ class Frontend extends App
         return $this->data_by_id($this->db_tables->respondent, $id);
     }
 
-    public function respondent_find($value, $field='email')
+    public function respondent_find($val, $field='email')
     {
-        return $this->get_by_field($this->db_tables->respondent, $field, $value);
+        return R::findOne($this->db_tables->respondent, $field.' = ? ', [ $val ]);
     }
 
     public function answer_get($id)
@@ -357,7 +404,7 @@ class Frontend extends App
 
     public function answer_find($value)
     {
-        return $this->get_like_field('answer', 'answer', $value);
+        return R::findOne('answer', ' answer LIKE ? ', [ $value ]);
     }
 
     public function data_by_respondent($table, $respondent_id)
@@ -379,7 +426,7 @@ class Frontend extends App
 
     public function a_respondent_by_status($status)
     {
-        return $this->get_like_field($this->db_tables->respondent, 'status', $status);
+        return R::findOne($this->db_tables->respondent, ' status = ? ', [ $status ]);
     }
 
     public function questionnaire_steps($id)

@@ -151,14 +151,7 @@ class Form extends Frontend
             // $this->questions = $this->questionnaire_questions($this->questionnaire->id); // fallback to load all questions
             // return $this->redirect('/thankyou');
 
-            if ($this->questionnaire->do_not_review) {
-                $back_label = 'Start again with new answers';
-                $this->session->set('respondent:'.$this->questionnaire->id, false); // reset respondent
-            } else {
-                $back_label = 'Review my answers';
-            }
-
-            return $this->render('form/thankyou.html.twig', ['back_link'=>'/q?step=1', 'back_label'=>$back_label]);
+            return $this->render('form/thankyou.html.twig', ['back_link'=>'/q?step=1']);
         }
 
         // if(isset($_GET['after']) || !$this->question_id){ // forward
@@ -220,7 +213,7 @@ class Form extends Frontend
                 $this->questionnaire->continue_label = $this->question->continue_label;
             } // custom per-question button
 
-            $this->attr = [ 'class' => ' fieldtype-'.$this->question->answer_type. ' field-'.$this->field_name ]; // reset attr for each Q
+            $this->attr = [ 'class' => ' fieldtype-'.$this->question->answer_type. ' field-'.$this->field_name ];
 
             $this->attr['data-help'] = $help = $this->question->question_note;
 
@@ -253,11 +246,6 @@ class Form extends Frontend
 
             $this->field_value = $prev_response ? $prev_response : $this->question->question_default_answer;
 
-            if($this->question->answer_type=='Email' && !$this->field_value){
-
-              $this->field_value = $this->session->get('respondent_email');
-            }
-
             $this->field_params = [];
 
             $this->field_params['required'] = !$this->question->skip_allowed;
@@ -265,27 +253,7 @@ class Form extends Frontend
                 $step_skip_allowed = false;
             }
 
-            $answer_type = $this->question->answer_type;
-
-            if ($answer_type=="Dropdown") {
-                $this->show_dropdown=true;
-                $this->choose_multiple=false;
-                $answer_type="Choice";
-            } elseif ($answer_type=="DropdownMultiple") {
-                $this->show_dropdown=true;
-                $this->choose_multiple=true;
-                $answer_type="Choice";
-            } elseif ($answer_type=="MultipleChoices") {
-                $this->show_dropdown=false;
-                $this->choose_multiple=true;
-                $answer_type="Choice";
-            } elseif ($answer_type=="Choice") {
-                $this->show_dropdown=false;
-                $this->choose_multiple=false;
-            }
-
-
-            switch ($answer_type) {
+            switch ($this->question->answer_type) {
             case "LongText":
 
                 $this->attr['rows'] = '4';
@@ -485,45 +453,34 @@ class Form extends Frontend
 //				]));
 
                 break;
+//            case "Tag":
+//                $dropdown=true;
+            
+                // no break
+            case "Dropdown":
+                $dropdown=true;
+
+                // no break
             case "Choice":
 
-                $choices = [];
-                $answers_list = $this->question->sharedAnswerList;
-                usort($answers_list, array($this, "usort_by_ts_added"));
+                //$answers = R::findAll( 'answer', $this->question);
+                //print_r($answers);
 
-                foreach ($answers_list as $s) {
+                $choices = [];
+                foreach ($this->question->sharedAnswerList as $s) {
+                    //print_r($s);
                     $choices[$s->answer] = $s->id;
                 }
 
-                global $bv;
-
-                if ($bv->preload_choices[$this->field_name]) {
-                    foreach ($bv->preload_choices[$this->field_name] as $id=>$val) {
-                        //print_r($s);
-                        $choices[$val] = $id;
-                    }
-                }
-
-                if ($this->show_dropdown) {
+                if ($dropdown) {
                     $this->attr['class'] .= ' select2';
-                }
-
-                // var_dump($this->show_dropdown, $this->choose_multiple, $this->attr);
-
-                $ph = false;
-                if ($this->show_dropdown && !$this->choose_multiple) {
-                    $ph = 'Select an option';
-                }
-                if ($this->show_dropdown && $this->choose_multiple) {
-                    $ph = 'Select one or more options';
                 }
 
                 $params = $this->field_params([
                     'choices' => $choices,
-                    'expanded' => !$this->show_dropdown,
-                    'multiple' => $this->choose_multiple,
-                    'data'	  => $this->choose_multiple ? [$prev_answer_id] : $prev_answer_id,
-                    'placeholder' => $ph,
+                    'expanded' => !$dropdown,
+                    'multiple' => false,
+                    'data'	  => $prev_answer_id,
                     //'label_attr'	  => ['class'=>'btn btn-primary'],
                     //'choice_attr'	  => ['class'=>'xyz']
                 ]);
@@ -531,18 +488,40 @@ class Form extends Frontend
                 $this->logger->info('Choice field_params', $params);
 
                 $form_builder->add($this->field_name, ChoiceType::class, $params);
+                unset($dropdown);
+
+                break;
+            case "MultipleChoices":
+
+                //$answers = R::findAll( 'answer', $this->question);
+                //print_r($answers);
+
+                $choices = [];
+                foreach ($this->question->sharedAnswerList as $s) {
+                    //print_r($s);
+                    $choices[$s->answer] = $s->id;
+                }
+
+                $params = $this->field_params([
+                    'choices' => $choices,
+                    'expanded' => true,
+                    'multiple' => true,
+                    'data'	  => [$prev_answer_id],
+                ]);
+
+                $this->logger->info('MultipleChoices field_params', $params);
+
+                $form_builder->add($this->field_name, ChoiceType::class, $params);
 
                 break;
             case "Likert":
 
                 global $likert;
-                $likert = new class {
-                };
+                $likert = new class{};
 
                 $likert->choices = [];
                 foreach ($this->question->sharedAnswerList as $s) {
-                    $o = new class {
-                    };
+                    $o = new class{};
 
                     $o->val = $s->answer;
                     $o->selected = $s->id==$this->field_value ?? true;
@@ -567,9 +546,7 @@ class Form extends Frontend
                 break;
             case "URL":
 
-                if (!$this->field_value) {
-                    $this->field_value = 'http://';
-                }
+                if(!$this->field_value) $this->field_value = 'http://';
 
                 $form_builder->add($this->field_name, URLType::class, $this->field_params([
                 ]));
@@ -599,8 +576,7 @@ class Form extends Frontend
             case "Sortable":
 
                 global $sortable;
-                $sortable = new class {
-                };
+                $sortable = new class{};
                 $sortable->choices = [];
                 foreach ($this->question->sharedAnswerList as $s) {
                     //print_r($s);
@@ -635,7 +611,7 @@ class Form extends Frontend
             case "Include":
 
                 $html = '<div class="form-group" id="'.$this->field_name.'">
-				' . $this->get_include('public_pages/'.$this->field_name).'</div>';
+				' . $this->get_include('custom/'.$this->field_name).'</div>';
                 $this->attr['html'] = $html;
 
                 $form_builder->add($this->sanitize_string($this->field_name), FormCustomCode::class, $this->field_params([
@@ -647,9 +623,6 @@ class Form extends Frontend
             case "Tag":
 
                 $this->attr['class'] .= ' form_tag';
-
-//                $this->output_before = "<a href='/needs' class='btn btn-info'>Browse the Needs/Offers Taxonomy</a>";
-                $this->output_before .= $this->get_include('templates/form/tag_modal.html');
 
                 $form_builder->add($this->field_name, ChoiceType::class, $this->field_params([
                     //'choice_value' => '',
