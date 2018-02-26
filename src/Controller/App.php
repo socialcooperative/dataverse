@@ -252,16 +252,22 @@ class App extends Controller
     {
         global $bv;
 
-        # Instantiate the client.
-        $mgClient = new Mailgun($this->conf->mail->mailgun_key);
+        try {
 
-        # Make the call to the client.
-        return $mgClient->sendMessage(
-        $this->conf->mail->domain,
-              array('from'	=> $this->conf->mail->from,
-                    'to'	  => $to,
-                    'subject' => $subject ? $subject : $this->conf->mail->subject_default,
-                    'html'	=> $msg)
-    );
+			# Instantiate the client.
+			$mgClient = new Mailgun($this->conf->mail->mailgun_key);
+
+			# Make the call to the client.
+			return $mgClient->sendMessage(
+			$this->conf->mail->domain,
+				  array('from'	=> $this->conf->mail->from,
+						'to'	  => $to,
+						'subject' => $subject ? $subject : $this->conf->mail->subject_default,
+						'html'	=> $msg)
+			);
+
+    	} catch (\Exception $e) {
+    		return false;
+    	}
     }
 }

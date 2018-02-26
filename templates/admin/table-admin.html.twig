@@ -25,8 +25,8 @@
               {% if it.status is null %}
                 <a href="/admin/respondent/{{ it.id }}/status/invite" class="btn btn-success btn-sm">Invite</a>
               {% else %}
-                {{ it.status }}
-                <a href="/admin/respondent/{{ it.id }}/status/invite" class="btn btn-danger btn-sm">Re-Create</a>
+              {{ it.status }}
+                <a href="/admin/respondent/{{ it.id }}/status/invite" class="btn btn-danger btn-sm">(Re-send) Invite</a>
               {% endif %}
               <!--{{ it.id }}-->
             </td>
