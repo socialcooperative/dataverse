@@ -5,10 +5,14 @@ use RedBeanPHP\R;
 
 class Frontend extends App
 {
-
     public function field_params($params=[])
     {
         return array_merge($this->field_params, ['label' => $this->field_label, 'attr' => $this->attr, 'data' => $this->field_value], $params);
+    }
+
+    public function usort_by_ts_added($a, $b)
+    {
+        return strcmp($a->ts_added, $b->ts_added);
     }
 
     public function respondent_questions_responses_save($data)
@@ -90,6 +94,9 @@ class Frontend extends App
                 } elseif ($this->answer_type=='Email') { // save email in main 'respondent' table
                     $this->respondent->email = $value;
                     R::store($this->respondent);
+
+                    $this->session->set('respondent_email', $value); // save in cookie
+
                     $col_name = 'Var';
                 } elseif ($this->answer_type=='MapLocation') {
                     $col_name = 'Point';
@@ -145,7 +152,6 @@ class Frontend extends App
 
                     $this->response_save_custom($value); // amount
                     $this->response_save_custom($this->currency, 'currency'); // currency code
-                    
                 } elseif ($col_name && !$try_by_id) { // simply store in appropriate column of response table
 
                     $respond[$col_name] = $value; // store
@@ -177,7 +183,6 @@ class Frontend extends App
                     }
 
                     $this->response_save_custom($answers);
-                    
                 } else { // store (single answer) in answer table
 
                     if ($value) {
