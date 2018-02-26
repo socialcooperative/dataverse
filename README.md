@@ -6,7 +6,7 @@ Dataverse is a user-friendly tool for creating conversational forms which store 
 ### How do I get set up? ###
 
 You can use the Dockerfile to get started, especially for development.
-Create a directory called /custom/ at the base, and copy the /config/secrets.php and make appropriate edits.
+Create a directory called /custom/ at the base, and copy the /config/secrets.php to /custom/secrets.php and make appropriate edits.
 You can use MySQL (recommended), Postgres, or SQLite. The tables/schema will be created on the fly.
 
 ### Who do I talk to? ###
