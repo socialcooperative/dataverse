@@ -19,7 +19,7 @@ if ($term && ($file = fopen($fpath, 'r')) !== FALSE) {
 //    	$id = $row[1] ? $row[0] : $i;
 //    	$val = $row[1] ? $row[1] : $row[0];
     	
-        if (preg_match("/^$term|	$term| $term/i", $val)){ 
+        if (preg_match("/^$term|	$term|, $term|\&$term|\/$term| $term/i", $val)){  // priorities: tag starts with, part after comma starts with, part after 'and' starts with, part after 'or' starts with, word starts with
             $return['results'][] = array('id'=>$val,'text'=>$val);
             $i++;
             if($i>500) break;
