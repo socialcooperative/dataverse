@@ -32,6 +32,9 @@ body, p {
 input.form-control, .select2-container, .select2-selection {
 	height: auto !important;
 }
+.select2-selection {
+	white-space: pre; /*for tree options workaround*/
+}
 
 select.form-control {
 	margin: 2px;
