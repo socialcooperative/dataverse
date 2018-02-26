@@ -655,6 +655,8 @@ class Form extends Frontend
                     'multiple' => true,
                 ]));
 
+                $form_builder->get($this->field_name)->resetViewTransformers();
+
                 break;
             default:
 
