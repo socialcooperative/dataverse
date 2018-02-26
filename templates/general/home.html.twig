@@ -2,20 +2,17 @@
 
 {% block content %}
 
-  <h2>The Commons Taxonomy of Needs and Offers</h2>
+  <h2>Welcome!</h2>
 
   <p>
-    Welcome {{name}}!
+    Hello
+    {{name}}
   </p>
 
   <ul>
     <li>
-      <a href="/needs">Browse the Taxonomy (Categories and Tags)</a>
+      <a href="{{ path('question', {'questionnaire_id': 1, 'step': 1 }) }}">Answer Questions (Sample Questionnaire)</a>
     </li>
-    <li>
-      <a href="{{ path('question', {'questionnaire_id': 2, 'step': 1 }) }}">Post a Need or Offer</a>
-    </li>
-
   </ul>
 
 {% endblock %}
