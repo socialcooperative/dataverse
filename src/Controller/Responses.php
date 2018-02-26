@@ -111,7 +111,11 @@ class Responses extends Admin
     {
         $this->admin_auth();
 
-        $cols = $this->questionnaire_questions($questionnaire_id); // load all questions
+        $questions = $this->questionnaire_questions($questionnaire_id); // load all questions
+
+        foreach($questions as $q){
+          if(!in_array($q->answer_type, ['Notice','Include','Password'])) $cols[$q->id] = $q;
+        }
 
         $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting);
 
