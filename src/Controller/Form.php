@@ -579,9 +579,7 @@ class Form extends Frontend
 
                 $this->attr['style'] .= 'display:none;';
 
-                preg_match('/([0-9.-]+).+?([0-9.-]+)/', $this->field_value, $matches);
-                $lat=(float)$matches[1];
-                $long=(float)$matches[2];
+                list($lat, $long) = $this->geo_point_to_array($this->field_value);
 
                 $this->custom_scripts .= "<script>
 				var loc_field = '#form_$this->field_name';
