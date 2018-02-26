@@ -261,4 +261,42 @@ class Taxonomy extends App
             exit(p); // TODO: other formats
         }
     }
+
+    public function tag_ancestors($tag_id=null)
+    {
+        return R::getAll(
+            'SELECT
+           node.`id`,
+           node.`label`,
+           path.`depth`,
+           node.`parent_id`
+          FROM
+           `tag` AS node
+           JOIN `tag_tree` AS path
+             ON node.`id` = path.`ancestor_id`
+          WHERE path.`descendant_id` = :tag_id
+           AND node.`is_deleted` = 0
+          -- AND path.`depth` <= 5
+          GROUP BY node.`id`
+          ORDER BY path.`depth` DESC',
+        [':tag_id' => $tag_id]
+        );
+    }
+
+    public function tag_ancestors_string($tag_id=null, $seperator=' ≫ ', $under_tag=false)
+    {
+        $tags = $this->tag_ancestors($tag_id);
+
+        foreach ($tags as $t) {
+            // var_dump( $under_tag, $t);
+            if ($str || !$under_tag || $under_tag==$t['parent_id']) {
+                if (!$str) {
+                    $str = $t['label'];
+                } else {
+                    $str .= $seperator.$t['label'];
+                }
+            }
+        }
+        return $str;
+    }
 }

@@ -30,4 +30,50 @@ class TaxonomyAPI extends Taxonomy
     {
         return $this->taxonomy_ouput(1, $taxonomy_id);
     }
+
+    /**
+    * @Route("/taxonomy/{taxonomy_id}/tag/{tag_id}/tags", name="search_tags_taxonomy_by_id_under_tag")
+    */
+    public function search_tags_taxonomy_by_id_under_tag($taxonomy_id = false, $tag_id=false)
+    {
+      return $this->search_tags_taxonomy_by_id($taxonomy_id, $tag_id);
+    }
+    /**
+    * @Route("/taxonomy/{taxonomy_id}/tags", name="search_tags_taxonomy_by_id")
+    */
+    public function search_tags_taxonomy_by_id($taxonomy_id = false, $under_tag=false)
+    {
+        $term   = $_GET['q'] ? $_GET['q'] : $_GET['term'];
+        $via   = $_GET['via'];
+
+        $ret = new class {
+        };
+
+        $results = R::getAll( "select id, label as label
+        from tag
+        where label like concat('%', :search, '%')
+        order by
+          label like concat(:search, '%') desc, -- starts with
+          label like concat('% ', :search) desc, -- full word at end
+          ifnull(nullif(instr(label, concat(' ', :search, ' ')), 0), 99999), -- full word
+          ifnull(nullif(instr(label, concat(', ', :search)), 0), 99999), -- after a comma
+          ifnull(nullif(instr(label, concat('/ ', :search)), 0), 99999), -- after an OR
+          ifnull(nullif(instr(label, concat('& ', :search)), 0), 99999), -- after an AND
+          label
+        LIMIT 30
+          ",
+        [':search' => $term]
+    );
+
+    foreach($results as $r){
+      // var_dump($r);
+      $r = (object) $r;
+      $ancestors_str = $this->tag_ancestors_string($r->id, ' ≫ ', $under_tag);
+      if($ancestors_str) $r->text = $ancestors_str;
+      $ret->results[] = $r;
+    }
+
+    return $this->json($ret);
+
+    }
 }
