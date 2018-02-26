@@ -91,6 +91,15 @@ class Build extends Backend
                 'attr'=>['placeholder' => 'survey'],
 
             ])
+            ->add('do_not_review', ChoiceType::class, [
+                'label' => 'When respondent visits the form again...',
+                'choices' => array(
+                    'Review previous answers' => null,
+                    'Start fresh' => 1
+                ),
+                'expanded'  => true,
+                'multiple'  => false,
+            ])
             ->add('continue_label', TextType::class, [
                 'label' => "Default text for 'Continue' buttons",
                 'attr'=>['placeholder' => 'Continue'],
@@ -133,7 +142,8 @@ class Build extends Backend
             foreach ($questions as $s) {
                 // print_r($s);
                 // if(!$s->step) $s->step = $prev_step+99;
-                $q = new class{};
+                $q = new class {
+                };
                 $q->label = $s->question->question_text ? $s->question->question_text : $s->question_text;
                 $q->type = $s->question->answer_type;
                 $sortable->choices[$s->step][$s->question->id ? $s->question->id : $s->id] = $q;
@@ -358,11 +368,12 @@ class Build extends Backend
 
             if (is_array($data)) { // new question
 
-              if(!$data['question_name']) $data['question_name'] = $data['question_text'];
-              $data['question_name'] = $this->sanitize_string($data['question_name'], true, true); // cleanup fieldname
+                if (!$data['question_name']) {
+                    $data['question_name'] = $data['question_text'];
+                }
+                $data['question_name'] = $this->sanitize_string($data['question_name'], true, true); // cleanup fieldname
 
-              $data['questionnaire'] = $this->questionnaire;
-
+                $data['questionnaire'] = $this->questionnaire;
             } else { // edit question (TODO)
                 $data = $data->export();
             }
