@@ -35,17 +35,20 @@ class App extends Controller
         $this->conf = $bv->config;
         $this->conf->base_path = $base_path;
 
-        if ($this->conf->db_type=='mysql') {
-            R::setup('mysql:host='.$this->conf->dbcreds['host'].';dbname='.$this->conf->db_name, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
-        } elseif ($this->conf->db_type=='postgres') { //postgresql
-            R::setup('pgsql:host='.$this->conf->dbcreds['host'].';dbname='.$this->conf->db_name, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
-        } else { // fallback to sqlite
-            if (!$this->conf->db_path) {
-                $this->conf->db_path = 'custom/db.txt';
-            }
-            R::setup('sqlite:'.$this->conf->base_path.$this->conf->db_path, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
-        } //sqlite
+        if (!$bv->db_should_be_connected) {
+            if ($this->conf->db_type=='mysql') {
+                R::setup('mysql:host='.$this->conf->dbcreds['host'].';dbname='.$this->conf->db_name, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
+            } elseif ($this->conf->db_type=='postgres') { //postgresql
+                R::setup('pgsql:host='.$this->conf->dbcreds['host'].';dbname='.$this->conf->db_name, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
+            } else { // fallback to sqlite
+                if (!$this->conf->db_path) {
+                    $this->conf->db_path = 'custom/db.txt';
+                }
+                R::setup('sqlite:'.$this->conf->base_path.$this->conf->db_path, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
+            } //sqlite
+        }
 
+        $bv->db_should_be_connected = true;
 
         $this->db_tables = new class {
         };
@@ -133,7 +136,9 @@ class App extends Controller
             $this->item = R::dispense($table_name);
         }
 
-         if(!is_array($data)) $data = (array) $data; // make sure we are dealing with an array
+        if (!is_array($data)) {
+            $data = (array) $data;
+        } // make sure we are dealing with an array
         //$this->logger->info('item_save()', $data);
 
         foreach ($data as $key => $value) {
@@ -142,15 +147,18 @@ class App extends Controller
             if (is_array($value)) { // multiple items - use linked table
 
                 if (count($value)>0) {
-
-                    if($custom_linked_table[$key]) $linked_ref = 'shared'.ucwords($custom_linked_table[$key]).'List';
-                    elseif($key==$table_name) $linked_ref = 'own'.ucwords($key).'List'; // self-referential
-                    else $linked_ref = 'shared'.ucwords($key).'List'; // many-to-many
+                    if ($custom_linked_table[$key]) {
+                        $linked_ref = 'shared'.ucwords($custom_linked_table[$key]).'List';
+                    } elseif ($key==$table_name) {
+                        $linked_ref = 'own'.ucwords($key).'List';
+                    } // self-referential
+                    else {
+                        $linked_ref = 'shared'.ucwords($key).'List';
+                    } // many-to-many
 
                     if ($value->id || current($value)->id) { // we're already being passed an array of Redbean objects
 
                         $this->item->{$linked_ref} = $value; // store relation
-
                     } else { // create linked entries for each of the array of values
 
                         foreach ($value as $linked_value) { // sub-array
@@ -160,23 +168,22 @@ class App extends Controller
 
                                 if (is_array($linked_value)) { // multiple cols
 
-                                	foreach ($linked_value as $linked_col =>$linked_col_val) {
+                                    foreach ($linked_value as $linked_col =>$linked_col_val) {
 
 //                                		$linked_item->$linked_col = $linked_col_val;
-                                		$linked_data[$linked_col] = $linked_col_val;
-                                	}
-
+                                        $linked_data[$linked_col] = $linked_col_val;
+                                    }
                                 } else { // single val
 
-                                	$label_field = $custom_linked_labels[$key] ? $custom_linked_labels[$key] : $key; // name of column
+                                    $label_field = $custom_linked_labels[$key] ? $custom_linked_labels[$key] : $key; // name of column
 
 //                                	$linked_item->$label_field = $linked_value;
-                                	$linked_data[$label_field] = $linked_value;
+                                    $linked_data[$label_field] = $linked_value;
                                 }
 
 //                                R::store($linked_item);
 
-								$linked_item = R::findOrCreate( $key, $linked_data );
+                                $linked_item = R::findOrCreate($key, $linked_data);
 
                                 $this->item->{$linked_ref}[] = $linked_item; // store relation
                             }
@@ -254,20 +261,19 @@ class App extends Controller
 
         try {
 
-			# Instantiate the client.
-			$mgClient = new Mailgun($this->conf->mail->mailgun_key);
+            # Instantiate the client.
+            $mgClient = new Mailgun($this->conf->mail->mailgun_key);
 
-			# Make the call to the client.
-			return $mgClient->sendMessage(
-			$this->conf->mail->domain,
-				  array('from'	=> $this->conf->mail->from,
-						'to'	  => $to,
-						'subject' => $subject ? $subject : $this->conf->mail->subject_default,
-						'html'	=> $msg)
-			);
-
-    	} catch (\Exception $e) {
-    		return false;
-    	}
+            # Make the call to the client.
+            return $mgClient->sendMessage(
+            $this->conf->mail->domain,
+                  array('from'	=> $this->conf->mail->from,
+                        'to'	  => $to,
+                        'subject' => $subject ? $subject : $this->conf->mail->subject_default,
+                        'html'	=> $msg)
+            );
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }

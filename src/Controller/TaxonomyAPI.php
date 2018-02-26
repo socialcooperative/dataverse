@@ -68,7 +68,7 @@ class TaxonomyAPI extends Taxonomy
     foreach($results as $r){
       // var_dump($r);
       $r = (object) $r;
-      $ancestors_str = $this->tag_ancestors_string($r->id, ' ≫ ', $under_tag);
+      $ancestors_str = $this->tag_name_with_ancestors($r->id, ' ≫ ', $under_tag);
       if($ancestors_str) $r->text = $ancestors_str;
       $ret->results[] = $r;
     }

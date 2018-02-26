@@ -32,11 +32,22 @@ class Responses extends Admin
         }
 
         if (!$the_response) {
-            // R::bindFunc('read', 'the_point', 'asText');
+            // R::bindFunc('read', 'response.the_point', 'asText');
             $the_response = $r->the_point;
-            list($lat, $long) = $this->geo_point_to_array($the_response);
 
-            $the_response = "<a href='https://www.openstreetmap.org/?mlat=$lat&mlon=$long&zoom=12#layers=M' target='_blank'>$lat, $long</a>";
+            if ($the_response) {
+                list($lat, $long) = $this->geo_point_to_array($the_response);
+
+                if ($lat) {
+                    $the_response = "<a href='https://www.openstreetmap.org/?mlat=$lat&mlon=$long&zoom=12#layers=M' target='_blank'>$lat, $long</a>";
+                }
+            }
+        }
+
+        if (is_numeric($the_response) && $r->question && $r->question->answer_type=='Tag') { // taxonomy tag
+            $tx = $this->get('Taxonomy');
+            $the_tag = $tx->tag_name_with_ancestors($the_response, $seperator=' ≫ ', 3);
+            $the_response = "<a href='/needs?tag_id=$the_response' target='_blank'>$the_tag</a>";
         }
 
 
@@ -65,7 +76,6 @@ class Responses extends Admin
 
         if ($people) {
             foreach ($people as $p) {
-
                 R::bindFunc('read', 'response.the_point', 'asText');
                 $resp_data = R::find('response', ' respondent_id = ?
               ORDER BY response_ts ASC', [ $p->id ]);
@@ -113,8 +123,10 @@ class Responses extends Admin
 
         $questions = $this->questionnaire_questions($questionnaire_id); // load all questions
 
-        foreach($questions as $q){
-          if(!in_array($q->answer_type, ['Notice','Include','Password'])) $cols[$q->id] = $q;
+        foreach ($questions as $q) {
+            if (!in_array($q->answer_type, ['Notice','Include','Password'])) {
+                $cols[$q->id] = $q;
+            }
         }
 
         $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting);

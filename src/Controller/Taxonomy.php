@@ -283,7 +283,7 @@ class Taxonomy extends App
         );
     }
 
-    public function tag_ancestors_string($tag_id=null, $seperator=' ≫ ', $under_tag=false)
+    public function tag_name_with_ancestors($tag_id=null, $seperator=' ≫ ', $under_tag=false)
     {
         $tags = $this->tag_ancestors($tag_id);
 
