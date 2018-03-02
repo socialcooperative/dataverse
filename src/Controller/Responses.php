@@ -55,7 +55,7 @@ class Responses extends Admin
         }
 
         if ($this->the_response_tag_id && $r->question && $r->question->question_name=='tag_new_label') { // new tag
-            $the_response .= " <a href='/taxonomy/tag/".$this->the_response_tag_id."/new?label=$the_response' class='btn btn-success' target='_blank'>Confirm Add</a>";
+            $the_response .= " <a href='/taxonomy/tag/".$this->the_response_tag_id."/new?label=$the_response' class='btn btn-sm btn-success pull-right' target='_blank'>Confirm Add</a>";
             $this->the_response_tag_id = false;
         }
 
