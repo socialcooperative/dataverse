@@ -1,6 +1,11 @@
 {% extends "layout.html.twig" %}
 {% block content %}
-  <h1>{{ items.getTotalItemCount }} responses</h1>
+
+{% include 'build/q_nav.html.twig' with {'current_id': questionnaire_id, 'questionnaires_list': questionnaires_list, 'q_nav_url': '/admin/responses/'} %}
+
+<h3>{{ items.getTotalItemCount }} responses</h3>
+
+
     <table class="table table-sm table-hover table-bordered">
       <thead class="thead-dark">
         <tr>

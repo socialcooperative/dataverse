@@ -135,10 +135,14 @@ class Responses extends Admin
 
         $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email);
 
+        $questionnaires_list = $this->questionnaires();
+
         return $this->render('admin/table-responses.html.twig', array(
       'cols' => $cols,
       'items' => $responses,
-      'pagination' => $this->pagination
+      'pagination' => $this->pagination,
+      'questionnaire_id' => $questionnaire_id,
+      'questionnaires_list' => $questionnaires_list
       ));
     }
 }
