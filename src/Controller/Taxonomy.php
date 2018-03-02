@@ -112,9 +112,9 @@ class Taxonomy extends App
         return R::findOne('tag', 'label LIKE ? AND parent_id = ? ', [ $value, $parent_id ]);
     }
 
-    public function tag_tree_list($tag_id=1, $separator='﹣', $max_depth=3)
+    public function tag_tree_list($tag_id=1, $separator='≫', $max_depth=3)
     {
-        $list = R::getAll("CALL tag_tree_list('$tag_id', '$separator', '$max_depth')");
+        $list = R::getAll("CALL tag_tree_list('$tag_id', ' $separator ', '$max_depth')");
         // var_dump($list);
         if (!count($list) && ($tag = $this->data_by_id('tag', $tag_id)) && $tag->parent_id) {
             return $this->tag_tree_list($tag->parent_id, $separator, $max_depth);
@@ -218,7 +218,7 @@ class Taxonomy extends App
         }
 
         if (!$separator) {
-            $separator = '﹣';
+            $separator = '≫';
         } //default
 
         if ($_REQUEST['output']=='tree') {
@@ -286,7 +286,7 @@ class Taxonomy extends App
                 if (!$str) {
                     $str = $t['label'];
                 } else {
-                    $str .= $separator.$t['label'];
+                    $str .= " $separator ".$t['label'];
                 }
             }
         }

@@ -65,10 +65,18 @@ class TaxonomyAPI extends Taxonomy
         [':search' => $term]
     );
 
+    if (!$separator) {
+        $separator = $_REQUEST['separator'];
+    }
+
+    if (!$separator) {
+        $separator = '≫';
+    }
+
     foreach($results as $r){
       // var_dump($r);
       $r = (object) $r;
-      $ancestors_str = $this->tag_name_with_ancestors($r->id, ' ≫ ', $under_tag);
+      $ancestors_str = $this->tag_name_with_ancestors($r->id, $separator, $under_tag);
       if($ancestors_str) $r->text = $ancestors_str;
       $ret->results[] = $r;
     }
