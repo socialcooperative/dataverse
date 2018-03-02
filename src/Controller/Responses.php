@@ -26,7 +26,7 @@ class Responses extends Admin
 
         $the_answer_id = $r->answer_id;
 
-        if (!$the_response && $r->answer) {
+        if (!$the_response && $r->answer && $r->answer->id) {
             $the_response = $r->answer->answer;
             $the_answer_id = $r->answer->id;
         }
@@ -55,7 +55,7 @@ class Responses extends Admin
         }
 
         if ($this->the_response_tag_id && $r->question && $r->question->question_name=='tag_new_label	') { // new tag
-            $the_response .= " <a href='/taxonomy/tag/$this->the_response_tag_id/new?label=$the_response' class='btn btn-success' target='_blank'>Confirm Add</a>";
+            $the_response .= " <a href='/taxonomy/tag/".$this->the_response_tag_id."/new?label=$the_response' class='btn btn-success' target='_blank'>Confirm Add</a>";
             $this->the_response_tag_id = false;
         }
 
