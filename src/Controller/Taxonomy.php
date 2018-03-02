@@ -214,6 +214,10 @@ class Taxonomy extends App
         } //default
 
         if (!$separator) {
+            $separator = $_REQUEST['separator'];
+        }
+
+        if (!$separator) {
             $separator = '﹣';
         } //default
 
@@ -272,7 +276,7 @@ class Taxonomy extends App
         );
     }
 
-    public function tag_name_with_ancestors($tag_id=null, $seperator=' ≫ ', $under_tag=false)
+    public function tag_name_with_ancestors($tag_id=null, $separator=' ≫ ', $under_tag=false)
     {
         $tags = $this->tag_ancestors($tag_id);
 
@@ -282,7 +286,7 @@ class Taxonomy extends App
                 if (!$str) {
                     $str = $t['label'];
                 } else {
-                    $str .= $seperator.$t['label'];
+                    $str .= $separator.$t['label'];
                 }
             }
         }
