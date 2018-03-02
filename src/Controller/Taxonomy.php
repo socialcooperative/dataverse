@@ -19,17 +19,6 @@ class Taxonomy extends App
         return $this->json($this->item);
     }
 
-    /**
-    * @Route("/taxonomy/{taxonomy_id}/tag/add", name="test")
-    */
-    public function taxonomy_add($taxonomy_id)
-    {
-        $this->taxonomy_id = $taxonomy_id;
-
-        $tag_id = $this->tag_add($_REQUEST['label'], $_REQUEST['parent'], $_REQUEST['grandparent'], $_REQUEST['meta']);
-
-        return $this->json($this->item);
-    }
 
     public function tag_add($label=null, $parent=null, $grandparent=null, $meta=[])
     {

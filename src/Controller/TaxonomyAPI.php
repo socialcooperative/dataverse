@@ -76,4 +76,28 @@ class TaxonomyAPI extends Taxonomy
     return $this->json($ret);
 
     }
+
+    /**
+    * @Route("/taxonomy/{taxonomy_id}/tag/{parent_tag}/new", name="taxonomy_tag_new")
+    */
+    public function taxonomy_tag_new($taxonomy_id, $parent_tag)
+    {
+        $this->taxonomy_id = $taxonomy_id;
+
+        $tag_id = $this->tag_add($_REQUEST['label'], $parent_tag, $_REQUEST['grandparent'], $_REQUEST['meta']);
+
+        return $this->json($this->item);
+    }
+
+    /**
+    * @Route("/taxonomy/tag/{parent_tag}/new", name="tag_add")
+    */
+    public function tag_new($parent_tag)
+    {
+
+        $tag_id = $this->tag_add($_REQUEST['label'], $parent_tag, $_REQUEST['grandparent'], $_REQUEST['meta']);
+
+        return $this->json($this->item);
+    }
+
 }

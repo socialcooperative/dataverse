@@ -48,8 +48,14 @@ class Responses extends Admin
             $tx = $this->get('Taxonomy');
             $the_tag = $tx->tag_name_with_ancestors($the_response, $seperator=' ≫ ', 3);
             $the_response = "<a href='/needs?tag_id=$the_response' target='_blank'>$the_tag</a>";
+
+            $this->the_response_tag_id = $the_response;
+
         }
 
+        if ($this->the_response_tag_id && $r->question && $r->question->question_name=='tag_new_label	') { // new tag
+            $the_response .= " <a href='/taxonomy/tag/$this->the_response_tag_id/new?label=$the_response' class='btn btn-success' target='_blank'>Confirm Add</a>";
+        }
 
         return [$the_answer_id, $the_response];
     }
