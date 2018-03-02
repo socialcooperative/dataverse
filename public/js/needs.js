@@ -218,6 +218,9 @@ function kp_mouseover(d) {
 	// if (percentage < 0.1) {
 	//   percentageString = "< 0.1%";
 	// }
+  // console.log(d.data)
+  active_tag_id = d.data.id;
+  active_tag_label = d.data.name;
 
 	var sequenceArray = d.ancestors().reverse();
 	// sequenceArray.shift(); // remove root node from the array
@@ -244,6 +247,7 @@ function kp_mouseover(d) {
 //	}
 
 	// d3.select("#knowledge_percentage").text(percentageString);
+
 }
 
 function initializeBreadcrumbTrail() {
