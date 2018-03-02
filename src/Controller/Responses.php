@@ -54,13 +54,14 @@ class Responses extends Admin
         return [$the_answer_id, $the_response];
     }
 
-    public function responses_browse($questionnaire_id, $page, $sort_by, $sorting)
+    public function responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email=false)
     {
         $this->questionnaire_id = $questionnaire_id ? $questionnaire_id : $this->session->get('questionnaire'); // get from session
 
         // R::debug();
 
-        $count = R::count('respondent', ' questionnaire_id = ? AND email IS NOT NULL ', [ $this->questionnaire_id ]);
+        if($has_email) $count = R::count('respondent', ' questionnaire_id = ? AND email IS NOT NULL ', [ $this->questionnaire_id ]);
+        else $count = R::count('respondent', ' questionnaire_id = ? ', [ $this->questionnaire_id ]);
 
         if (!$count) {
             return [];
@@ -72,7 +73,8 @@ class Responses extends Admin
 
         $per_page = 50;
 
-        $people = R::find('respondent', " questionnaire_id = ? ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]); // list all
+        if($has_email) $people = R::find('respondent', " questionnaire_id = ? AND email IS NOT NULL ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]); // list all with email
+        else $people = R::find('respondent', " questionnaire_id = ? ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]); // list all
 
         if ($people) {
             foreach ($people as $p) {
@@ -127,9 +129,11 @@ class Responses extends Admin
             if (!in_array($q->answer_type, ['Notice','Include','Password'])) {
                 $cols[$q->id] = $q;
             }
+
+            if($q->answer_type=='Email') $has_email = true;
         }
 
-        $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting);
+        $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email);
 
         return $this->render('admin/table-responses.html.twig', array(
       'cols' => $cols,
