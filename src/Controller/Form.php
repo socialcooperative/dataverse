@@ -253,9 +253,9 @@ class Form extends Frontend
 
             $this->field_value = $prev_response ? $prev_response : $this->question->question_default_answer;
 
-            if($this->question->answer_type=='Email' && !$this->field_value){
-
-              $this->field_value = $this->session->get('respondent_email');
+            if(!$this->field_value){ // pre-set an answer
+              if($_REQUEST[$this->field_name]) $this->field_value = $_REQUEST[$this->field_name];
+              elseif($this->question->answer_type=='Email') $this->field_value = $this->session->get('respondent_email');
             }
 
             $this->field_params = [];
@@ -646,14 +646,22 @@ class Form extends Frontend
 
                 $this->attr['class'] .= ' form_tag';
 
-//                $this->output_before = "<a href='/needs' class='btn btn-info'>Browse the Needs/Offers Taxonomy</a>";
                 $this->output_before .= $this->get_include('templates/form/tag_modal.html');
 
-                $form_builder->add($this->field_name, ChoiceType::class, $this->field_params([
+                $choices = [];
+                if($this->field_value){ // pre-set
+                  $preset_tag_label = $_REQUEST[$this->field_name.'_label'] ? $_REQUEST[$this->field_name.'_label'] : $this->field_value;
+                  $choices[$preset_tag_label] = $this->field_value;
+                }
+
+                $params = $this->field_params([
                     //'choice_value' => '',
                     'placeholder' => 'Select a tag',
                     'multiple' => true,
-                ]));
+                    'choices' => $choices,
+                ]);
+
+                $form_builder->add($this->field_name, ChoiceType::class, $params);
 
                 $form_builder->get($this->field_name)->resetViewTransformers();
 
