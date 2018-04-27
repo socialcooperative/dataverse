@@ -95,6 +95,11 @@ class Responses extends Admin
                     list($key, $c) = $this->response_value($r);
 
                     if ($r->question_id) {
+
+                      if($c && $this->questions[$r->question_id] && $this->questions[$r->question_id]->question_name && $bv->preload_choices[$this->questions[$r->question_id]->question_name] && $bv->preload_choices[$this->questions[$r->question_id]->question_name][$c]){
+                        $c = $bv->preload_choices[$this->questions[$r->question_id]->question_name][$c];
+                      }
+
                         if ($pr[$r->question_id] && !is_array($pr[$r->question_id])) { // first of multiple answers
                             $first_a = $pr[$r->question_id];
                             $pr[$r->question_id] = [];
@@ -142,7 +147,7 @@ class Responses extends Admin
         if(in_array($q->answer_type, ['Notice','Include','Password'])) continue;
         if(!$include_personal_info && in_array($q->answer_type, ['Email','Phone'])) continue;
 
-        $cols[$q->id] = $q;
+        $this->questions[$q->id] = $q;
       }
 
       $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field, $include_personal_info);
@@ -150,7 +155,7 @@ class Responses extends Admin
       $questionnaires_list = $this->questionnaires();
 
       return $this->render('admin/table-responses.html.twig', array(
-      'cols' => $cols,
+      'cols' => $this->questions,
       'items' => $responses,
       'pagination' => $this->pagination,
       'questionnaire_id' => $questionnaire_id,
