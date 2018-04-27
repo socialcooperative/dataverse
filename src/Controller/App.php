@@ -255,6 +255,11 @@ class App extends Controller
         return $this->admin_auth($blocking, 'members_token');
     }
 
+    public function questionnaire_auth($questionnaire_id, $blocking = true)
+    {
+        return $this->admin_auth($blocking, 'token_questionnaire_'.$questionnaire_id);
+    }
+
     public function email_send($msg, $to, $subject=false)
     {
         global $bv;

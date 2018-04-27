@@ -62,13 +62,13 @@ class Responses extends Admin
         return [$the_answer_id, $the_response];
     }
 
-    public function responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email=false)
+    public function responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field=false)
     {
         $this->questionnaire_id = $questionnaire_id ? $questionnaire_id : $this->session->get('questionnaire'); // get from session
 
         // R::debug();
 
-        if($has_email) $count = R::count('respondent', ' questionnaire_id = ? AND email IS NOT NULL ', [ $this->questionnaire_id ]);
+        if($has_email_field) $count = R::count('respondent', ' questionnaire_id = ? AND email IS NOT NULL ', [ $this->questionnaire_id ]);
         else $count = R::count('respondent', ' questionnaire_id = ? ', [ $this->questionnaire_id ]);
 
         if (!$count) {
@@ -81,7 +81,7 @@ class Responses extends Admin
 
         $per_page = 50;
 
-        if($has_email) $people = R::find('respondent', " questionnaire_id = ? AND email IS NOT NULL ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]); // list all with email
+        if($has_email_field) $people = R::find('respondent', " questionnaire_id = ? AND email IS NOT NULL ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]); // list all with email
         else $people = R::find('respondent', " questionnaire_id = ? ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]); // list all
 
         if ($people) {
@@ -129,7 +129,10 @@ class Responses extends Admin
     */
     public function admin_responses($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
     {
-        $this->admin_auth();
+        // $this->admin_auth();
+        if (!$this->member_auth(false) && !$this->admin_auth(false)) {
+            $this->questionnaire_auth($questionnaire_id, true);
+        }
 
         $questions = $this->questionnaire_questions($questionnaire_id); // load all questions
 
@@ -138,10 +141,10 @@ class Responses extends Admin
                 $cols[$q->id] = $q;
             }
 
-            if($q->answer_type=='Email') $has_email = true;
+            if($q->answer_type=='Email') $has_email_field = true;
         }
 
-        $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email);
+        $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field);
 
         $questionnaires_list = $this->questionnaires();
 
