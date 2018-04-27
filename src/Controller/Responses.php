@@ -144,6 +144,8 @@ class Responses extends Admin
 
         if($q->answer_type=='Email') $has_email_field = true;
 
+        if($q->answer_type=='Include') @include_once($this->conf->base_path.'public_pages/'.$q->question_name);
+
         if(in_array($q->answer_type, ['Notice','Include','Password'])) continue;
         if(!$include_personal_info && in_array($q->answer_type, ['Email','Phone'])) continue;
 
