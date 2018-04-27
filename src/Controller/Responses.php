@@ -64,6 +64,8 @@ class Responses extends Admin
 
     public function responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field=false, $include_personal_info=true)
     {
+        global $bv;
+
         $this->questionnaire_id = $questionnaire_id ? $questionnaire_id : $this->session->get('questionnaire'); // get from session
 
         // R::debug();
