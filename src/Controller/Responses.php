@@ -62,7 +62,7 @@ class Responses extends Admin
         return [$the_answer_id, $the_response];
     }
 
-    public function responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field=false)
+    public function responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field=false, $include_personal_info=true)
     {
         $this->questionnaire_id = $questionnaire_id ? $questionnaire_id : $this->session->get('questionnaire'); // get from session
 
@@ -123,37 +123,49 @@ class Responses extends Admin
         }
     }
 
-
     /**
-    * @Route("/admin/responses/{questionnaire_id}/{page}/{sort_by}/{sorting}", name="admin_responses", requirements={"questionnaire_id"="\d+", "page"="\d+", "sort_by": "[a-zA-Z0-9_]+", "sorting": "asc|desc"})
+    * @Route("/responses/{questionnaire_id}/{page}/{sort_by}/{sorting}", name="list_responses", requirements={"questionnaire_id"="\d+", "page"="\d+", "sort_by": "[a-zA-Z0-9_]+", "sorting": "asc|desc"})
     */
-    public function admin_responses($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
+    public function list_responses($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc', $include_personal_info=false)
     {
-        // $this->admin_auth();
-        if (!$this->member_auth(false) && !$this->admin_auth(false)) {
-            $this->questionnaire_auth($questionnaire_id, true);
-        }
 
-        $questions = $this->questionnaire_questions($questionnaire_id); // load all questions
+      if (!$this->member_auth(false) && !$this->admin_auth(false)) {
+          $this->questionnaire_auth($questionnaire_id, true);
+      }
 
-        foreach ($questions as $q) {
-            if (!in_array($q->answer_type, ['Notice','Include','Password'])) {
-                $cols[$q->id] = $q;
-            }
+      $questions = $this->questionnaire_questions($questionnaire_id); // load all questions
 
-            if($q->answer_type=='Email') $has_email_field = true;
-        }
+      foreach ($questions as $q) {
 
-        $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field);
+        if($q->answer_type=='Email') $has_email_field = true;
 
-        $questionnaires_list = $this->questionnaires();
+        if(in_array($q->answer_type, ['Notice','Include','Password'])) continue;
+        if(!$include_personal_info && in_array($q->answer_type, ['Email','Phone'])) continue;
 
-        return $this->render('admin/table-responses.html.twig', array(
+        $cols[$q->id] = $q;
+      }
+
+      $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field, $include_personal_info);
+
+      $questionnaires_list = $this->questionnaires();
+
+      return $this->render('admin/table-responses.html.twig', array(
       'cols' => $cols,
       'items' => $responses,
       'pagination' => $this->pagination,
       'questionnaire_id' => $questionnaire_id,
       'questionnaires_list' => $questionnaires_list
       ));
+
+    }
+
+    /**
+    * @Route("/admin/responses/{questionnaire_id}/{page}/{sort_by}/{sorting}", name="admin_responses", requirements={"questionnaire_id"="\d+", "page"="\d+", "sort_by": "[a-zA-Z0-9_]+", "sorting": "asc|desc"})
+    */
+    public function admin_responses($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
+    {
+
+        return list_responses($questionnaire_id, $page, $sort_by, $sorting, true);
+
     }
 }
