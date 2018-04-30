@@ -1,0 +1,47 @@
+{% extends "layout.html.twig" %}
+{% block content %}
+
+{% include 'build/q_nav.html.twig' with {'current_id': questionnaire_id, 'questionnaires_list': questionnaires_list, 'q_nav_url': '/admin/responses/'} %}
+
+<h3>{{ items.getTotalItemCount }} responses</h3>
+
+
+    <table class="table table-sm table-hover table-bordered">
+      <thead class="thead-dark">
+        <tr>
+          {% for q in cols %}
+
+          <th style="min-width:140px;"><small>{{q.question_text}}</small></th>
+
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+          {% if item %}
+            {% for q in cols %}
+
+            <td>
+              {% if item[q.id] is defined and item[q.id] is iterable %}
+                <ul>
+                  <li>{{item[q.id]|join('<li>')|raw}}
+                </ul>
+              {% else %}
+                {{item[q.id]|default("")|raw}}
+              {% endif %}
+            </td>
+
+            {% endfor %}
+          {% endif %}
+
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  <div class="navigation float-right">
+    {{ knp_pagination_render(items) }}
+  </div>
+
+{% endblock %}

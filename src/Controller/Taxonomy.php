@@ -19,17 +19,6 @@ class Taxonomy extends App
         return $this->json($this->item);
     }
 
-    /**
-    * @Route("/taxonomy/{taxonomy_id}/tag/add", name="test")
-    */
-    public function taxonomy_add($taxonomy_id)
-    {
-        $this->taxonomy_id = $taxonomy_id;
-
-        $tag_id = $this->tag_add($_REQUEST['label'], $_REQUEST['parent'], $_REQUEST['grandparent'], $_REQUEST['meta']);
-
-        return $this->json($this->item);
-    }
 
     public function tag_add($label=null, $parent=null, $grandparent=null, $meta=[])
     {
@@ -123,9 +112,9 @@ class Taxonomy extends App
         return R::findOne('tag', 'label LIKE ? AND parent_id = ? ', [ $value, $parent_id ]);
     }
 
-    public function tag_tree_list($tag_id=1, $separator='﹣', $max_depth=3)
+    public function tag_tree_list($tag_id=1, $separator='≫', $max_depth=3)
     {
-        $list = R::getAll("CALL tag_tree_list('$tag_id', '$separator', '$max_depth')");
+        $list = R::getAll("CALL tag_tree_list('$tag_id', ' $separator ', '$max_depth')");
         // var_dump($list);
         if (!count($list) && ($tag = $this->data_by_id('tag', $tag_id)) && $tag->parent_id) {
             return $this->tag_tree_list($tag->parent_id, $separator, $max_depth);
@@ -225,7 +214,11 @@ class Taxonomy extends App
         } //default
 
         if (!$separator) {
-            $separator = '﹣';
+            $separator = $_REQUEST['separator'];
+        }
+
+        if (!$separator) {
+            $separator = '≫';
         } //default
 
         if ($_REQUEST['output']=='tree') {
@@ -260,5 +253,43 @@ class Taxonomy extends App
             print_r($tag_tree);
             exit(p); // TODO: other formats
         }
+    }
+
+    public function tag_ancestors($tag_id=null)
+    {
+        return R::getAll(
+            'SELECT
+           node.`id`,
+           node.`label`,
+           path.`depth`,
+           node.`parent_id`
+          FROM
+           `tag` AS node
+           JOIN `tag_tree` AS path
+             ON node.`id` = path.`ancestor_id`
+          WHERE path.`descendant_id` = :tag_id
+           AND node.`is_deleted` = 0
+          -- AND path.`depth` <= 5
+          GROUP BY node.`id`
+          ORDER BY path.`depth` DESC',
+        [':tag_id' => $tag_id]
+        );
+    }
+
+    public function tag_name_with_ancestors($tag_id=null, $separator=' ≫ ', $under_tag=false)
+    {
+        $tags = $this->tag_ancestors($tag_id);
+
+        foreach ($tags as $t) {
+            // var_dump( $under_tag, $t);
+            if ($str || !$under_tag || $under_tag==$t['parent_id']) {
+                if (!$str) {
+                    $str = $t['label'];
+                } else {
+                    $str .= " $separator ".$t['label'];
+                }
+            }
+        }
+        return $str;
     }
 }

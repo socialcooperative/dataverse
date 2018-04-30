@@ -418,4 +418,12 @@ class Frontend extends App
         // var_dump($this->conf->question_id_username, $respondent_id, $r);
         return $r->the_var ? $r->the_var : $r->answer->answer;
     }
+
+    public function geo_point_to_array($point_from_db)
+    {
+      preg_match('/([0-9.-]+).+?([0-9.-]+)/', $point_from_db, $matches);
+      return [ (float)$matches[1], (float)$matches[2] ]; // lat/long
+    }
+
+
 }
