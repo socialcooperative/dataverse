@@ -25,7 +25,7 @@
 			<a class="btn btn-warning btn-sm" href="#" onclick="return tag_go('/q/7?step=1')">Merge with another tag</a>
 			<a class="btn btn-danger btn-sm" href="#" onclick="return tag_go('/q/6?step=1')">Delete</a>
 			<p><a class="btn btn-info btn-sm" href="#" onclick="return tag_go('/q/3?step=1')">Add a tag as sub-category</a>
-      <p><a class="btn btn-info btn-sm" href="#" onclick="return tag_go('/q/9?step=1')">Link with a related tag</a>
+      <a class="btn btn-info btn-sm" href="#" onclick="return tag_go('/q/9?step=1')">Link with a related tag</a>
 			<div id="knowledge_description">
 			</div>
 		</div>
@@ -41,7 +41,7 @@ var active_tag_label = "<?=$_GET['tag_label']?>";
 
 // var json_url = "/needs_json?parent=<?=urlencode($_GET['parent'])?>&item=<?=urlencode($_GET['item'])?>";
 
-var json_url = "/taxonomy/2/tag/<?=($_GET['tag_id'] ? intval($_GET['tag_id']) : 3)?>?output=tree&format=json";
+var json_url = "/taxonomy/<?=($_GET['taxonomy_id'] ? intval($_GET['taxonomy_id']) : $taxonomy_default)?>/tag/<?=($_GET['tag_id'] ? intval($_GET['tag_id']) : $tag_default)?>?output=tree&format=json";
 
 function tag_go(url){
   window.location=url+'&tag='+active_tag_id+'&tag_label='+active_tag_label;
@@ -49,4 +49,4 @@ function tag_go(url){
 }
 
 </script>
-<script type="text/javascript" src="/js/needs.js?v1.1"></script>
+<script type="text/javascript" src="/js/taxonomy_browser.js?v1.1"></script>

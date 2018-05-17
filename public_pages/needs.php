@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>Taxonomy Browser</title>
+	<title>Commons Taxonomy Browser</title>
 
 </head>
 
@@ -12,7 +12,9 @@
 	<h3>Needs & Offers Taxonomy <?=($_GET['tag_label'] ? ' > '.$_GET['tag_label'] : '')?></h3>
 
 	<?php
-    include_once("needs_browser.php");
+    $taxonomy_default = 2;
+    $tag_default = 3;
+    include_once("taxonomy_browser.php");
     ?>
 </body>
 

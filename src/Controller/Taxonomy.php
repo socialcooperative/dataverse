@@ -231,6 +231,8 @@ class Taxonomy extends App
             $this->output_format = 'json';
         } //default
 
+        // TODO: filter by taxonomy_id
+
         $tag_tree = $this->tag_tree_list($parent_id, $separator, $limit_depth);
         // echo '<pre>'; print_r($tag_tree); exit();
 
