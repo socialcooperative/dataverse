@@ -7,7 +7,13 @@ Dataverse is a user-friendly tool for creating conversational forms which store 
 
 You can use the Dockerfile to get started, especially for development.
 Create a directory called /custom/ at the base, and copy the /config/secrets.php to /custom/secrets.php and make appropriate edits.
-You can use MySQL (recommended), Postgres, or SQLite. The tables/schema will be created on the fly.
+The database is not included in the Dockerfile. You can use MySQL (recommended), Postgres, or SQLite. The tables/schema will be created on the fly.
+
+### What's the stack? ###
+
+* PHP7
+* Symfony 4: https://symfony.com/doc/current/setup/flex.html
+* SQL using https://RedBeanPHP.com as ORM
 
 ### Who do I talk to? ###
 
