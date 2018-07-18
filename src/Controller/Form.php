@@ -642,7 +642,7 @@ class Form extends Frontend
                 ]));
 
                 break;
-            case "Tag":
+            case "TaxonomyTag":
 
                 $this->attr['class'] .= ' form_tag';
 
