@@ -1,4 +1,4 @@
-<a class='taxonomy btn btn-info' href='/needs' class='btn btn-info'>Browse the Taxonomy</a>
+<a class='taxonomy btn btn-info' href='/taxonomy' class='btn btn-info'>Browse the Taxonomy</a>
 
 <div id='taxonomy_modal' class='modal fade' role='dialog'>
   <div class='modal-dialog modal-lg' style="min-width:98%;">
@@ -23,10 +23,7 @@
 <script type="text/javascript">
   $('a.taxonomy').click(function() {
     var item = $('select.fieldtype-Tag option:last').val();
-    //	    console.log(item);
-    //	    if(item) var src = '/needs_browser?item='+item;
-    //	    else
-    var src = '/needs_browser';
+    var src = '/taxonomy_browser';
     $("#taxonomy_browse").attr('src', src);
     $('#taxonomy_modal').modal('show');
     return false;
