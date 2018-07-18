@@ -90,7 +90,7 @@ class TaxonomyAPI extends Taxonomy
     */
     public function taxonomy_tag_new($taxonomy_id, $parent_tag)
     {
-        $this->taxonomy_id = $taxonomy_id;
+        if($taxonomy_id) $this->taxonomy_id = $taxonomy_id;
 
         $tag_id = $this->tag_add($_REQUEST['label'], $parent_tag, $_REQUEST['grandparent'], $_REQUEST['meta']);
 

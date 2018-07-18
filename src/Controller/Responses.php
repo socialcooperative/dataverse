@@ -174,7 +174,7 @@ class Responses extends Admin
     public function admin_responses($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
     {
 
-        return list_responses($questionnaire_id, $page, $sort_by, $sorting, true);
+        return $this->list_responses($questionnaire_id, $page, $sort_by, $sorting, true);
 
     }
 }

@@ -107,7 +107,7 @@ class App extends Controller
     public function get_include($file)
     {
         ob_start();
-        include($this->conf->base_path.$file);
+        include_once($this->conf->base_path.$file);
         return ob_get_clean();
     }
 
