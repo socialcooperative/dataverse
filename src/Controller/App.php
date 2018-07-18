@@ -9,7 +9,7 @@ use RedBeanPHP\R;
 
 class App extends Controller
 {
-    public function __construct(LoggerInterface $logger, SessionInterface $session)
+    public function __construct(LoggerInterface $logger=null, SessionInterface $session=null)
     {
 
             // parent::__construct();
@@ -19,8 +19,7 @@ class App extends Controller
 
         global $bv;
         if (!$bv) {
-            $bv = new class {
-            };
+            $bv = new class {};
         }
         $bv->base_path = $base_path = dirname(dirname(dirname(__FILE__))).'/';
 
