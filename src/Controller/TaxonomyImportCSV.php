@@ -8,11 +8,11 @@ set_time_limit(0);
 ini_set("memory_limit", "2048M");
 //ignore_user_abort(true);
 
-class TaxonomyImport extends Taxonomy
+class TaxonomyImportCSV extends Taxonomy // TEMPORARY: used to import taxonomy data from a CSV with the following columns: Level 0,Level 1,Level 2,Level 3,Level 4,Level 5,Level 6,UN0,UN1,UN2,UN3,Google,eBay,NICE
 {
 
     /**
-    * @Route("/import/{limit_depth}", name="timport")
+    * @Route("/import/csv/{limit_depth}", name="timport")
     */
     public function import($limit_depth = 1) // better to run through command line
     {
@@ -93,9 +93,9 @@ class TaxonomyImport extends Taxonomy
             }
         }
 
-        //		echo '<pre>'; print_r($r); exit();
+        echo '<pre>'; print_r($r); exit();
 
-        $this->import_iterate($r);
+        // $this->import_iterate($r); // UNCOMMENT TO ACTUALLY RUN THE IMPORT
 
 
         exit();

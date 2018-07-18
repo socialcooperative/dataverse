@@ -13,7 +13,6 @@
         "php-http/curl-client": "^1.7",
         "sensio/framework-extra-bundle": "^5.1",
         "symfony/asset": "^4.0",
-        "symfony/console": "^4.0",
         "symfony/flex": "^1.0",
         "symfony/form": "^4.0",
         "symfony/framework-bundle": "^4.0",
@@ -25,6 +24,12 @@
         "symfony/yaml": "^4.0"
     },
     "require-dev": {
+        "addwiki/wikibase-api": "^0.7.0",
+        "data-values/common": "~0.3.0|~0.4.0",
+        "data-values/geo": "^3.0.0|~0.4.0",
+        "data-values/number": "^0.10.0",
+        "data-values/time": "^0.8.6",
+        "symfony/console": "^4.0",
         "symfony/dotenv": "^4.0",
         "symfony/profiler-pack": "^1.0",
         "symfony/web-server-bundle": "^4.0"
