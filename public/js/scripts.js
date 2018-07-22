@@ -53,8 +53,15 @@ $(document).ready(function() {
     allowClear: true,
     placeholder: "Start typing your language & select it"
   });
-  
+
   $(".form_tag").select2({
+    minimumInputLength: 2,
+    tags: true,
+    allowClear: true
+    // placeholder: "Enter options as tags, seperated by commas"
+  });
+
+  $(".form_taxonomy_tag").select2({
     ajax: {
       url: "/tags?via=select2",
       dataType: 'json',

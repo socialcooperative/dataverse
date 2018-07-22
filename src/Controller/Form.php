@@ -644,9 +644,32 @@ class Form extends Frontend
                 ]));
 
                 break;
-            case "TaxonomyTag":
+            case "Tag":
 
                 $this->attr['class'] .= ' form_tag';
+
+                $choices = [];
+                if($this->field_value){ // pre-set
+                  $preset_tag_label = $_REQUEST[$this->field_name.'_label'] ? $_REQUEST[$this->field_name.'_label'] : $this->field_value;
+                  $choices[$preset_tag_label] = $this->field_value;
+                }
+
+                $params = $this->field_params([
+                    //'choice_value' => '',
+                    'placeholder' => 'Enter options as tags, seperated by commas',
+                    'multiple' => true,
+                    'choices' => $choices,
+                ]);
+
+                $form_builder->add($this->field_name, ChoiceType::class, $params);
+
+                $form_builder->get($this->field_name)->resetViewTransformers();
+
+                break;
+
+            case "TaxonomyTag":
+
+                $this->attr['class'] .= ' form_taxonomy_tag';
 
                 $this->output_before .= $this->get_include('templates/form/tag_modal.html');
 
