@@ -654,9 +654,11 @@ class Form extends Frontend
                   $choices[$preset_tag_label] = $this->field_value;
                 }
 
+                $this->attr['data-placeholder'] = 'Enter options as tags, seperated by commas';
+                
                 $params = $this->field_params([
                     //'choice_value' => '',
-                    'data-placeholder' => 'Enter options as tags, seperated by commas',
+                    'placeholder' => $this->attr['data-placeholder'],
                     'multiple' => true,
                     'choices' => $choices,
                 ]);
