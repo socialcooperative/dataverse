@@ -64,6 +64,22 @@ $(document).ready(function() {
     });
   });
 
+  $(".form_taxonomy_tag").each(function(){
+    var $this_taxonomy_tag = $(this);
+    $this_taxonomy_tag.select2({
+      ajax: {
+        url: "/tags?via=select2",
+        dataType: 'json',
+        delay: 250,
+        cache: true
+      },
+      minimumInputLength: 3,
+      tags: true,
+      allowClear: true,
+      placeholder: $this_taxonomy_tag.data('placeholder')
+    });
+  });
+
   $(".form_taxonomy_tag").select2({
     ajax: {
       url: "/tags?via=select2",
