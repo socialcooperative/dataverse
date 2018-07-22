@@ -555,7 +555,9 @@ class Form extends Frontend
 
                 $this->output_after .= $this->get_include('templates/form/likert.html');
 
-                $form_builder->add($this->field_name, HiddenType::class, $this->field_params([]));
+                $this->attr['style'] .= 'display:none;';
+
+                $form_builder->add($this->field_name, TextType::class, $this->field_params([]));
 
                 break;
             case "UploadImage":
