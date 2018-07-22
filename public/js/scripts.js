@@ -54,11 +54,14 @@ $(document).ready(function() {
     placeholder: "Start typing your language & select it"
   });
 
-  $(".form_tag").select2({
-    minimumInputLength: 2,
-    tags: true,
-    allowClear: true
-    // placeholder: "Enter options as tags, seperated by commas"
+  $(".form_tag").each(function(){
+    var $this_tag = $(this);
+    $this_tag.select2({
+      minimumInputLength: 2,
+      tags: true,
+      allowClear: true,
+      placeholder: $this_tag.data('placeholder')
+    });
   });
 
   $(".form_taxonomy_tag").select2({
