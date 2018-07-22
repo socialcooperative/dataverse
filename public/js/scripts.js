@@ -76,7 +76,8 @@ $(document).ready(function() {
       minimumInputLength: 3,
       tags: true,
       allowClear: true,
-      placeholder: $this_taxonomy_tag.data('placeholder')
+      placeholder: $this_taxonomy_tag.data('placeholder'),
+      tokenSeparators: [',']
     });
   });
 
@@ -90,7 +91,8 @@ $(document).ready(function() {
     minimumInputLength: 3,
     tags: true,
     allowClear: true,
-    placeholder: "Start typing your tags & select from the suggestions"
+    placeholder: "Start typing your tags & select from the suggestions",
+    tokenSeparators: [',']
   });
 
   //  the following simple make textboxes "Auto-Expand" when typed in
