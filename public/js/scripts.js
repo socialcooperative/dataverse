@@ -60,7 +60,8 @@ $(document).ready(function() {
       minimumInputLength: 2,
       tags: true,
       allowClear: true,
-      placeholder: $this_tag.data('placeholder')
+      placeholder: $this_tag.data('placeholder'),
+      tokenSeparators: [',']
     });
   });
 
@@ -79,20 +80,6 @@ $(document).ready(function() {
       placeholder: $this_taxonomy_tag.data('placeholder'),
       tokenSeparators: [',']
     });
-  });
-
-  $(".form_taxonomy_tag").select2({
-    ajax: {
-      url: "/tags?via=select2",
-      dataType: 'json',
-      delay: 250,
-      cache: true
-    },
-    minimumInputLength: 3,
-    tags: true,
-    allowClear: true,
-    placeholder: "Start typing your tags & select from the suggestions",
-    tokenSeparators: [',']
   });
 
   //  the following simple make textboxes "Auto-Expand" when typed in
