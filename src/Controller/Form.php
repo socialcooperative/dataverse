@@ -656,7 +656,7 @@ class Form extends Frontend
 
                 $params = $this->field_params([
                     //'choice_value' => '',
-                    'placeholder' => 'Enter options as tags, seperated by commas',
+                    'data-placeholder' => 'Enter options as tags, seperated by commas',
                     'multiple' => true,
                     'choices' => $choices,
                 ]);
