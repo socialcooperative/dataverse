@@ -60,7 +60,7 @@ class Responses extends Admin
 
         if ($this->the_response_tag_id) {
             if ($r->question->question_name=='tag_new_label') { // new tag
-                $the_response .= $this->response_action_button("/taxonomy/tag/". $this->the_response_tag_id ."/new?format=redirect&label=$this->the_response_tag_id");
+                $the_response .= $this->response_action_button("/taxonomy/tag/". $this->the_response_tag_id ."/new?format=redirect&label=$the_response");
             }
 
             if ($this->questionnaire->questionnaire_name=='tag_move') { // delete tag
