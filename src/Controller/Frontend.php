@@ -73,7 +73,15 @@ class Frontend extends App
             $try_by_id=false;
             unset($col_name);
 
+            if ($this->answer_type=='TaxonomyTag') {
+                $try_by_id=false;
+            } // workaround
+
             if ($value) {
+                if (is_array($value) && count($value)<2) {
+                    $value = current($value);
+                }
+
                 if (in_array($this->answer_type, ['UploadImage','UploadDoc','UploadFile'])) {
                     $dir = $this->conf->base_path.'custom/uploads';
                     $file = $value;
@@ -126,7 +134,7 @@ class Frontend extends App
                     $col_name = 'Var';
                 } elseif ($this->answer_type=='Password') {
                     $col_name = 'Var';
-                    // TODO
+                // TODO
                 } elseif (is_numeric($value)) {
                     $col_name = 'Num';
                 }
@@ -135,7 +143,8 @@ class Frontend extends App
                     $col_name = $this->col_prefix.$col_name;
                 }
 
-                // var_dump("<p>", $col_name, $this->answer_type, $try_by_id);
+                // var_dump($value, $col_name, $this->answer_type, $try_by_id);
+                // exit();
 
                 if ($this->answer_type=='Price') { // both number & currency
 
@@ -421,9 +430,7 @@ class Frontend extends App
 
     public function geo_point_to_array($point_from_db)
     {
-      preg_match('/([0-9.-]+).+?([0-9.-]+)/', $point_from_db, $matches);
-      return [ (float)$matches[1], (float)$matches[2] ]; // lat/long
+        preg_match('/([0-9.-]+).+?([0-9.-]+)/', $point_from_db, $matches);
+        return [ (float)$matches[1], (float)$matches[2] ]; // lat/long
     }
-
-
 }

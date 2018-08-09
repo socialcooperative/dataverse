@@ -44,22 +44,49 @@ class Responses extends Admin
             }
         }
 
-        if (is_numeric($the_response) && $r->question && $r->question->answer_type=='Tag') { // taxonomy tag
+        // var_dump($the_answer_id, $the_response, $r->question);
 
-          $this->the_response_tag_id = $the_answer_id = $the_response;
+        if (is_numeric($the_response) && $r->question && $r->question->answer_type=='TaxonomyTag') { // taxonomy tag
 
-          $tx = $this->get('Taxonomy');
-          $the_tag = $tx->tag_name_with_ancestors($the_response, $seperator=' ≫ ', 3);
-          if($the_tag) $the_response = "<a href='/needs?tag_id=$the_response' target='_blank'>$the_tag</a>";
+            $this->the_response_tag_id = $the_response;
 
+            $tx = $this->get('Taxonomy');
+            $the_tag = $tx->tag_name_with_ancestors($this->the_response_tag_id, $seperator=' ≫ ');
+
+            if ($the_tag) {
+                $the_response = "<a class='question-".$r->question->question_name."' href='/needs?tag_id=$this->the_response_tag_id' target='_blank'>$the_tag</a>";
+            }
         }
 
-        if ($this->the_response_tag_id && $r->question && $r->question->question_name=='tag_new_label') { // new tag
-            $the_response .= " <a href='/taxonomy/tag/".$this->the_response_tag_id."/new?label=$the_response' class='btn btn-sm btn-success pull-right' target='_blank'>Confirm Add</a>";
-            $this->the_response_tag_id = false;
+        if ($this->the_response_tag_id) {
+            if ($r->question->question_name=='tag_new_label') { // new tag
+                $the_response .= $this->response_action_button("/taxonomy/tag/". $this->the_response_tag_id ."/new?format=redirect&label=$this->the_response_tag_id");
+            }
+
+            if ($this->questionnaire->questionnaire_name=='tag_move') { // delete tag
+
+                if ($this->move_from_tag) {
+                    $the_response .= $this->response_action_button("/taxonomy/tag/". $this->move_from_tag ."/edit?parent_tag=". $this->the_response_tag_id ."&format=redirect", 'warning');
+                } else {
+                    $this->move_from_tag = $this->the_response_tag_id;
+                }
+            }
+
+            if ($this->questionnaire->questionnaire_name=='tag_delete') { // delete tag
+                $the_response .= $this->response_action_button("/taxonomy/tag/". $this->the_response_tag_id ."/delete?format=redirect", 'danger');
+            }
         }
+
+        // $the_response .= " // A: ".$this->the_response_tag_id." T: ".$r->question->answer_type." N: ".$this->questionnaire->questionnaire_name." ID: ".$this->the_response_tag_id." Q: ".$r->question->question_name;
+
 
         return [$the_answer_id, $the_response];
+    }
+
+    public function response_action_button($link, $class='success')
+    {
+        $this->the_response_tag_id = false;
+        return "<a href='$link' class='btn btn-sm btn-$class pull-right'>Confirm</a>";
     }
 
     public function responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field=false, $include_personal_info=true)
@@ -70,8 +97,11 @@ class Responses extends Admin
 
         // R::debug();
 
-        if($has_email_field) $count = R::count('respondent', ' questionnaire_id = ? AND email IS NOT NULL ', [ $this->questionnaire_id ]);
-        else $count = R::count('respondent', ' questionnaire_id = ? ', [ $this->questionnaire_id ]);
+        if ($has_email_field) {
+            $count = R::count('respondent', ' questionnaire_id = ? AND email IS NOT NULL ', [ $this->questionnaire_id ]);
+        } else {
+            $count = R::count('respondent', ' questionnaire_id = ? ', [ $this->questionnaire_id ]);
+        }
 
         if (!$count) {
             return [];
@@ -83,8 +113,12 @@ class Responses extends Admin
 
         $per_page = 50;
 
-        if($has_email_field) $people = R::find('respondent', " questionnaire_id = ? AND email IS NOT NULL ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]); // list all with email
-        else $people = R::find('respondent', " questionnaire_id = ? ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]); // list all
+        if ($has_email_field) {
+            $people = R::find('respondent', " questionnaire_id = ? AND email IS NOT NULL ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]);
+        } // list all with email
+        else {
+            $people = R::find('respondent', " questionnaire_id = ? ORDER BY $sort_by $sorting ", [ $this->questionnaire_id ]);
+        } // list all
 
         if ($people) {
             foreach ($people as $p) {
@@ -97,10 +131,9 @@ class Responses extends Admin
                     list($key, $c) = $this->response_value($r);
 
                     if ($r->question_id) {
-
-                      if($c && $this->questions[$r->question_id] && $this->questions[$r->question_id]->question_name && $bv->preload_choices[$this->questions[$r->question_id]->question_name] && $bv->preload_choices[$this->questions[$r->question_id]->question_name][$c]){
-                        $c = $bv->preload_choices[$this->questions[$r->question_id]->question_name][$c];
-                      }
+                        if ($c && $this->questions[$r->question_id] && $this->questions[$r->question_id]->question_name && $bv->preload_choices[$this->questions[$r->question_id]->question_name] && $bv->preload_choices[$this->questions[$r->question_id]->question_name][$c]) {
+                            $c = $bv->preload_choices[$this->questions[$r->question_id]->question_name][$c];
+                        }
 
                         if ($pr[$r->question_id] && !is_array($pr[$r->question_id])) { // first of multiple answers
                             $first_a = $pr[$r->question_id];
@@ -135,37 +168,45 @@ class Responses extends Admin
     */
     public function list_responses($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc', $include_personal_info=false)
     {
+        if (!$this->member_auth(false) && !$this->admin_auth(false)) {
+            $this->questionnaire_auth($questionnaire_id, true);
+        }
 
-      if (!$this->member_auth(false) && !$this->admin_auth(false)) {
-          $this->questionnaire_auth($questionnaire_id, true);
-      }
+        $this->questionnaire = $this->questionnaire_get($questionnaire_id);
 
-      $questions = $this->questionnaire_questions($questionnaire_id); // load all questions
+        $questions = $this->questionnaire_questions($questionnaire_id); // load all questions
 
-      foreach ($questions as $q) {
+        foreach ($questions as $q) {
+            if ($q->answer_type=='Email') {
+                $has_email_field = true;
+            }
 
-        if($q->answer_type=='Email') $has_email_field = true;
+            if ($q->answer_type=='Include') {
+                @include_once($this->conf->base_path.'public_pages/'.$q->question_name);
+            }
 
-        if($q->answer_type=='Include') @include_once($this->conf->base_path.'public_pages/'.$q->question_name);
+            if (in_array($q->answer_type, ['Notice','Include','Password'])) {
+                continue;
+            }
+            if (!$include_personal_info && in_array($q->answer_type, ['Email','Phone'])) {
+                continue;
+            }
 
-        if(in_array($q->answer_type, ['Notice','Include','Password'])) continue;
-        if(!$include_personal_info && in_array($q->answer_type, ['Email','Phone'])) continue;
+            $this->questions[$q->id] = $q;
+        }
 
-        $this->questions[$q->id] = $q;
-      }
+        $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field, $include_personal_info);
 
-      $responses = $this->responses_browse($questionnaire_id, $page, $sort_by, $sorting, $has_email_field, $include_personal_info);
+        $questionnaires_list = $this->questionnaires();
 
-      $questionnaires_list = $this->questionnaires();
-
-      return $this->render('admin/table-responses.html.twig', array(
+        return $this->render('admin/table-responses.html.twig', array(
       'cols' => $this->questions,
       'items' => $responses,
       'pagination' => $this->pagination,
       'questionnaire_id' => $questionnaire_id,
+      'questionnaire_tile' => $this->questionnaire->questionnaire_title,
       'questionnaires_list' => $questionnaires_list
       ));
-
     }
 
     /**
@@ -173,8 +214,6 @@ class Responses extends Admin
     */
     public function admin_responses($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
     {
-
         return $this->list_responses($questionnaire_id, $page, $sort_by, $sorting, true);
-
     }
 }

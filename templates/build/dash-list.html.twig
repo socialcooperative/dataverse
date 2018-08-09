@@ -2,15 +2,20 @@
 
 {% block content %}
 
+{% include 'build/q_nav.html.twig' with {'questionnaires_list': questionnaires_list, 'q_nav_url': '/admin/responses/'} %}
+
   <div class="row justify-content-md-center">
     <div class="col col-md-6">
 
       <h1>{{ title|e }}</h1>
 
-      <a href="/build/questionnaire?new" class="btn btn-info float-right">New Questionnaire</a>
+      <p>
+        <a href="/build/questionnaire?new" class="btn btn-info">New Questionnaire</a>
+      </p>
 
+      <h3>{{'Edit Questionnaires'|e}}</h3>
       <ul class="clearfix">
-        {% for v in data %}
+        {% for v in questionnaires_list %}
           <li>
             <a href="/build/questionnaire?id={{ v.id|e }}">
               {{ v.questionnaire_title|e }}

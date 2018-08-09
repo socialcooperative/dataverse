@@ -96,9 +96,10 @@ class Taxonomy extends App
     }
 
 
-    public function tag_delete()
+    public function tag_hide($tag_id)
     {
-        //		CALL `tag_hide`('26', '1') // call procedure to hide child tags too
+        //		CALL `tag_hide`('26', '1') // call procedure which hides child tags too
+        return R::exec("CALL tag_hide('$tag_id', 1)");
     }
 
     public function tag_search_with_parent($value, $parent)
@@ -127,9 +128,9 @@ class Taxonomy extends App
         exit("\n!! Mismatch with tag_search_with_parent($value, $parent)\n");
     }
 
-    public function tag_by_id($tag_id)
+    public function tag_meta_by_id($tag_id)
     {
-        $tag = R::load('tag', $tag_id);
+        $tag = $this->tag_by_id($tag_id);
         $tagArray = $tag->export();
         $metas = $tag->sharedMetaList;
         foreach ($metas as $m) {
@@ -141,6 +142,14 @@ class Taxonomy extends App
         }
 
         return $tagArray;
+    }
+
+    public function tag_by_id($tag_id)
+    {
+        $tag = R::load('tag', $tag_id);
+        // $tag = $tag->export();
+
+        return $tag;
     }
 
     public function tags_by_meta($type=null, $detail=null, $data=null, $return_as_bean=false)
@@ -203,7 +212,7 @@ class Taxonomy extends App
     public function tag_tree_list($tag_id=1, $separator='≫', $max_depth=3)
     {
         $list = R::getAll("CALL tag_tree_list('$tag_id', ' $separator ', '$max_depth')");
-        // var_dump($list);
+        // var_dump("CALL tag_tree_list('$tag_id', ' $separator ', '$max_depth')", $list);
         if (!count($list) && ($tag = $this->data_by_id('tag', $tag_id)) && $tag->parent_id) {
             return $this->tag_tree_list($tag->parent_id, $separator, $max_depth);
         } // if empty tree, show parent's tree
@@ -329,7 +338,7 @@ class Taxonomy extends App
             $tag_tree = $this->tree_deflatten($tag_tree);
         // echo '<pre>'; print_r($tag_tree); exit();
         } else {
-            $tag_tree = $this->tag_by_id($parent_id);
+            $tag_tree = $this->tag_meta_by_id($parent_id);
         }
 
         return ($tag_tree);
@@ -350,7 +359,7 @@ class Taxonomy extends App
 
     public function tag_ancestors($tag_id=null)
     {
-        return R::getAll(
+        $t = R::getAll(
             'SELECT
            node.`id`,
            node.`label`,
@@ -367,14 +376,18 @@ class Taxonomy extends App
           ORDER BY path.`depth` DESC',
         [':tag_id' => $tag_id]
         );
+        // var_dump($t);
+        return $t;
     }
 
     public function tag_name_with_ancestors($tag_id=null, $separator=' ≫ ', $under_tag=false)
     {
+        // var_dump($tag_id, $separator, $under_tag);
+
         $tags = $this->tag_ancestors($tag_id);
 
         foreach ($tags as $t) {
-            // var_dump( $under_tag, $t);
+            // var_dump($under_tag, $t);
             if ($str || !$under_tag || $under_tag==$t['parent_id']) {
                 if (!$str) {
                     $str = $t['label'];
@@ -383,6 +396,23 @@ class Taxonomy extends App
                 }
             }
         }
+        // var_dump($tags, $str);
+
         return $str;
+    }
+
+    public function tag_edit($tag_id, $update=[])
+    {
+        // R::fancyDebug(true);
+
+        $tag = $this->tag_by_id($tag_id);
+
+        if ($update['parent_tag']) {
+            $tag->parent_id = (int) $update['parent_tag'];
+        }
+
+        R::store($tag);
+
+        return $tag;
     }
 }

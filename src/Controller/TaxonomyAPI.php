@@ -98,6 +98,8 @@ class TaxonomyAPI extends Taxonomy
             $ancestors_str = $this->tag_name_with_ancestors($r->id, $separator, $under_tag);
             if ($ancestors_str) {
                 $r->text = $ancestors_str;
+            } else {
+                $r->text = $r->label;
             }
             $ret->results[] = $r;
         }
@@ -114,9 +116,7 @@ class TaxonomyAPI extends Taxonomy
             $this->taxonomy_id = $taxonomy_id;
         }
 
-        $tag_id = $this->tag_add($_REQUEST['label'], $parent_tag, $_REQUEST['grandparent'], $_REQUEST['meta']);
-
-        return $this->json($this->item);
+        return $this->tag_new($parent_tag);
     }
 
     /**
@@ -126,6 +126,39 @@ class TaxonomyAPI extends Taxonomy
     {
         $tag_id = $this->tag_add($_REQUEST['label'], $parent_tag, $_REQUEST['grandparent'], $_REQUEST['meta']);
 
-        return $this->json($this->item);
+        if ($_REQUEST['format']=='redirect') {
+            header("Location: /taxonomies?toast=Tag added!&tag_id=".$tag_id);
+        } else {
+            return $this->json($this->item);
+        }
+    }
+
+
+    /**
+    * @Route("/taxonomy/tag/{tag_id}/edit", name="api_tag_edit")
+    */
+    public function api_tag_edit($tag_id)
+    {
+        $e = $this->tag_edit($tag_id, $_REQUEST);
+
+        if ($_REQUEST['format']=='redirect') {
+            header("Location: /taxonomies?toast=Tag moved!&tag_id=".$tag_id);
+        } else {
+            return $this->json("Moved");
+        }
+    }
+
+    /**
+    * @Route("/taxonomy/tag/{tag_id}/delete", name="tag_delete")
+    */
+    public function tag_delete($tag_id)
+    {
+        $del = $this->tag_hide($tag_id);
+
+        if ($_REQUEST['format']=='redirect') {
+            header("Location: /taxonomies?toast=Tag deleted!&tag_id=".$tag_id);
+        } else {
+            return $this->json("Deleted");
+        }
     }
 }

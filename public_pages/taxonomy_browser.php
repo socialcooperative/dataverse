@@ -9,10 +9,18 @@ if (!$tag_default) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-<script src="/js/d3.v4.min.js"></script> 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+<script src="/js/d3.v4.min.js"></script>
 <link rel="stylesheet" type="text/css" href="/css/sequences.css" />
 
+
+
+<div class="form-group"><select id="form_tag" name="s" class="fieldtype-TaxonomyTag field-tag taxonomy_search form-control" data-help="" data-placeholder="Search tag" style="width:100%"><</select></div>
+
 <?=($_GET['tag_id'] ? '<a class="btn btn-info float-right" href="?">Back to top categories</a> ' : '')?>
+
 <p>Click on an any of the items to view more detailed sub-categories and tags.</p>
 
 <div id="knowledge_browser">
@@ -58,10 +66,6 @@ var active_tag_label = "<?=$_GET['tag_label']?>";
 
 var json_url = "/taxonomy/<?=($_GET['taxonomy_id'] ? intval($_GET['taxonomy_id']) : $taxonomy_default)?>/tag/<?=($_GET['tag_id'] ? intval($_GET['tag_id']) : $tag_default)?>?output=tree&format=json";
 
-function tag_go(url){
-  window.location=url+'&tag='+active_tag_id+'&tag_label='+active_tag_label;
-  return false;
-}
-
 </script>
+<script type="text/javascript" src="/js/taxonomies.js?v1.1"></script>
 <script type="text/javascript" src="/js/taxonomy_browser.js?v1.1"></script>

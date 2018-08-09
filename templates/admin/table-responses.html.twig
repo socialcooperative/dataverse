@@ -3,8 +3,13 @@
 
 {% include 'build/q_nav.html.twig' with {'current_id': questionnaire_id, 'questionnaires_list': questionnaires_list, 'q_nav_url': '/admin/responses/'} %}
 
-<h3>{{ items.getTotalItemCount }} responses</h3>
+<h3>{{questionnaire_tile}}:
+{% if items is iterable and items|length %}
+{{items.getTotalItemCount }}
+{% endif %}
+responses</h3>
 
+{% if items|length %}
 
     <table class="table table-sm table-hover table-bordered">
       <thead class="thead-dark">
@@ -43,5 +48,7 @@
   <div class="navigation float-right">
     {{ knp_pagination_render(items) }}
   </div>
+
+  {% endif %}
 
 {% endblock %}

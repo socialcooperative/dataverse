@@ -1,0 +1,21 @@
+{% extends "layout.html.twig" %}
+
+
+{% block content %}
+
+{% include 'build/q_nav.html.twig' with {'questionnaires_list': questionnaires_list, 'q_nav_url': '/admin/responses/'} %}
+
+  <h2>Welcome!</h2>
+
+  <p>
+    Hello
+    {{name}}
+  </p>
+
+  <ul>
+    <li>
+      <a href="{{ path('question', {'questionnaire_id': 1, 'step': 1 }) }}">Answer Questions (Sample Questionnaire)</a>
+    </li>
+  </ul>
+
+{% endblock %}
