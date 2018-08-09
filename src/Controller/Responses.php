@@ -60,7 +60,7 @@ class Responses extends Admin
 
         if ($this->the_response_tag_id) {
             if ($r->question->question_name=='tag_new_label') { // new tag
-                $the_response .= $this->response_action_button("/taxonomy/tag/". $this->the_response_tag_id ."/new?format=redirect&label=$the_response");
+                $the_response .= $this->response_action_button("/taxonomy/tag/". $this->the_response_tag_id ."/new?format=redirect&label=". urlencode($the_response));
             }
 
             if ($this->questionnaire->questionnaire_name=='tag_move') { // delete tag
@@ -70,6 +70,10 @@ class Responses extends Admin
                 } else {
                     $this->move_from_tag = $this->the_response_tag_id;
                 }
+            }
+
+            if ($r->question->question_name=='tag_label_new') { // rename tag
+                $the_response .= $this->response_action_button("/taxonomy/tag/". $this->the_response_tag_id ."/edit?format=redirect&label=". urlencode($the_response), 'danger');
             }
 
             if ($this->questionnaire->questionnaire_name=='tag_delete') { // delete tag

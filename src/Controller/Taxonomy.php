@@ -407,6 +407,10 @@ class Taxonomy extends App
 
         $tag = $this->tag_by_id($tag_id);
 
+        if ($update['label']) {
+            $tag->label = strip_tags($update['label']);
+        }
+
         if ($update['parent_tag']) {
             $tag->parent_id = (int) $update['parent_tag'];
         }
