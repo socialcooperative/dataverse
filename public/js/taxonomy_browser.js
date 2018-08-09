@@ -8,7 +8,7 @@ var container_bounds = container.getBoundingClientRect();
 // Dimensions of sunburst.
 var width = container_bounds.width * 0.5;
 var height = width;
-var radius = Math.min(width, height) / 2;
+var radius = Math.min(width, height) / 2; 
 
 // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
 var b = {
@@ -222,6 +222,9 @@ function kp_mouseover(d) {
   active_tag_id = d.data.id;
   active_tag_label = d.data.name;
 
+  $('.knowledge_name').empty();
+  $('#tag_meta').empty();
+
 	var sequenceArray = d.ancestors().reverse();
 	// sequenceArray.shift(); // remove root node from the array
 
@@ -236,6 +239,30 @@ function kp_mouseover(d) {
 		.attr("class", 'relevant');
 
 	if(!selecting_related) updateBreadcrumbs(sequenceArray);
+
+  // load and display meta data
+  $.getJSON( "/taxonomy/tag/"+active_tag_id+"?output=meta&format=json", function( data ) {
+    var items = [];
+
+    $.each( data.meta, function( key, val ) {
+      if(typeof val === 'object'){
+        $.each( val, function( key2, val2 ) {
+          items.push( "<li class='meta-" + key + "'>" + key + " (" + key2 + "): " + val2 + "</li>" );
+        });
+      } else {
+        items.push( "<li class='meta-" + key + "'>" + key + ": " + val + "</li>" );
+      }
+    });
+
+
+    $('#tag_meta').empty();
+    $( "<ul/>", {
+      "class": "meta-list",
+      html: items.join( "" )
+    }).appendTo( "#tag_meta" );
+
+  });
+
 
 //	if(!selecting_related && select_id){
 //		var related = $("#knowledge_paths").find("[data-id='" + select_id + "']");

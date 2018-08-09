@@ -12,7 +12,7 @@ class TaxonomyAPI extends Taxonomy
     */
     public function taxonomy_by_and_tag($taxonomy_id = false, $parent_id = 1)
     {
-        return $this->taxonomy_ouput($parent_id, $taxonomy_id);
+        return $this->taxonomy_output($parent_id, $taxonomy_id);
     }
 
     /**
@@ -20,7 +20,7 @@ class TaxonomyAPI extends Taxonomy
     */
     public function taxonomy_by_tag($parent_id = 1)
     {
-        return $this->taxonomy_ouput($parent_id);
+        return $this->taxonomy_output($parent_id);
     }
 
     /**
@@ -28,7 +28,7 @@ class TaxonomyAPI extends Taxonomy
     */
     public function full_taxonomy_by_id($taxonomy_id = false)
     {
-        return $this->taxonomy_ouput(1, $taxonomy_id);
+        return $this->taxonomy_output(1, $taxonomy_id);
     }
 
     /**
@@ -36,8 +36,26 @@ class TaxonomyAPI extends Taxonomy
     */
     public function search_tags_taxonomy_by_id_under_tag($taxonomy_id = false, $tag_id=false)
     {
-      return $this->search_tags_taxonomy_by_id($taxonomy_id, $tag_id);
+        return $this->search_tags_taxonomy_by_id($taxonomy_id, $tag_id);
     }
+
+    /**
+    * @Route("/taxonomy/meta/{type}/{detail}/{data}/tags", name="search_tags_by_meta_data")
+    */
+    public function search_tags_by_meta_data($type=null, $detail=null, $data=null)
+    {
+        return $this->json($this->tags_by_meta($type, $detail, $data));
+    }
+
+    /**
+    * @Route("/taxonomy/meta/{type}/{detail}/tags", name="search_tags_by_meta")
+    */
+    public function search_tags_by_meta($type=null, $detail=null)
+    {
+        return $this->search_tags_by_meta_data($type, $detail, null);
+    }
+
+
     /**
     * @Route("/taxonomy/{taxonomy_id}/tags", name="search_tags_taxonomy_by_id")
     */
@@ -49,7 +67,8 @@ class TaxonomyAPI extends Taxonomy
         $ret = new class {
         };
 
-        $results = R::getAll( "select id, label as label
+        $results = R::getAll(
+            "select id, label as label
         from tag
         where label like concat('%', :search, '%')
         order by
@@ -65,24 +84,25 @@ class TaxonomyAPI extends Taxonomy
         [':search' => $term]
     );
 
-    if (!$separator) {
-        $separator = $_REQUEST['separator'];
-    }
+        if (!$separator) {
+            $separator = $_REQUEST['separator'];
+        }
 
-    if (!$separator) {
-        $separator = '≫';
-    }
+        if (!$separator) {
+            $separator = '≫';
+        }
 
-    foreach($results as $r){
-      // var_dump($r);
-      $r = (object) $r;
-      $ancestors_str = $this->tag_name_with_ancestors($r->id, $separator, $under_tag);
-      if($ancestors_str) $r->text = $ancestors_str;
-      $ret->results[] = $r;
-    }
+        foreach ($results as $r) {
+            // var_dump($r);
+            $r = (object) $r;
+            $ancestors_str = $this->tag_name_with_ancestors($r->id, $separator, $under_tag);
+            if ($ancestors_str) {
+                $r->text = $ancestors_str;
+            }
+            $ret->results[] = $r;
+        }
 
-    return $this->json($ret);
-
+        return $this->json($ret);
     }
 
     /**
@@ -90,7 +110,9 @@ class TaxonomyAPI extends Taxonomy
     */
     public function taxonomy_tag_new($taxonomy_id, $parent_tag)
     {
-        if($taxonomy_id) $this->taxonomy_id = $taxonomy_id;
+        if ($taxonomy_id) {
+            $this->taxonomy_id = $taxonomy_id;
+        }
 
         $tag_id = $this->tag_add($_REQUEST['label'], $parent_tag, $_REQUEST['grandparent'], $_REQUEST['meta']);
 
@@ -102,10 +124,8 @@ class TaxonomyAPI extends Taxonomy
     */
     public function tag_new($parent_tag)
     {
-
         $tag_id = $this->tag_add($_REQUEST['label'], $parent_tag, $_REQUEST['grandparent'], $_REQUEST['meta']);
 
         return $this->json($this->item);
     }
-
 }

@@ -36,13 +36,13 @@ class Taxonomy extends App
             $data['parent'] = $this->get_like_field('tag', 'label', $parent);
         }
 
-        if ($this->taxonomy_id) {
+        if (isset($this->taxonomy_id) &&  is_numeric($this->taxonomy_id)) {
             $data['taxonomy'][] = $this->data_by_id('taxonomy', $this->taxonomy_id);
         }
 
         //		var_dump($this->taxonomy_id, $data); exit();
 
-        if (count($meta)) {
+        if (isset($meta) && count($meta)) {
             foreach ($meta as $type => $subtypes) {
                 foreach ($subtypes as $subtype => $vals) {
                     if (!is_array($vals)) {
@@ -65,15 +65,36 @@ class Taxonomy extends App
         return $tag_id;
     }
 
-
-    public function tag_meta_prepare($type, $subtype, $val)
+    public function tag_meta_prepare($type, $subtype, $val, &$meta = [])
     {
-        //		exit("$tag_id, $type, $subtype, $val");
         $meta['meta_type'] = $type;
-        $meta['meta_detail'] = $subtype;
+        $meta['meta_detail'] = $subtype ? $subtype : '';
         $meta['meta_data'] = $val;
+
         return $meta;
     }
+
+    public function meta_add_to_tag($tag, $type, $subtype=null, $val)
+    {
+        if (!$tag) {
+            return exit('You need to indicate what tag');
+        } elseif (is_numeric($tag)) {
+            $tag = R::load('tag', $tag);
+        }
+
+        $meta = R::dispense('meta');
+
+        $meta->meta_type = $type;
+        $meta->meta_detail = $subtype ? $subtype : '';
+        $meta->meta_data = $val;
+
+        $meta->sharedTagList[] = $tag;
+
+        $meta_id = R::store($meta);
+
+        return $meta_id;
+    }
+
 
     public function tag_delete()
     {
@@ -106,6 +127,73 @@ class Taxonomy extends App
         exit("\n!! Mismatch with tag_search_with_parent($value, $parent)\n");
     }
 
+    public function tag_by_id($tag_id)
+    {
+        $tag = R::load('tag', $tag_id);
+        $tagArray = $tag->export();
+        $metas = $tag->sharedMetaList;
+        foreach ($metas as $m) {
+            if ($m->meta_detail) {
+                $tagArray['meta'][$m->meta_type][$m->meta_detail] = $m->meta_data;
+            } else {
+                $tagArray['meta'][$m->meta_type] = $m->meta_data;
+            }
+        }
+
+        return $tagArray;
+    }
+
+    public function tags_by_meta($type=null, $detail=null, $data=null, $return_as_bean=false)
+    {
+
+      // var_dump($type, $detail, $data);
+        // exit();
+        $result = [];
+
+        if ($type && $detail && $data) {
+            $metas = R::find('meta', ' meta_type LIKE ? AND meta_detail LIKE ? AND meta_data LIKE ? ', [ $type, $detail, $data ]);
+        } elseif ($type && $detail) {
+            $metas = R::find('meta', ' meta_type LIKE ? AND meta_detail LIKE ?', [ $type, $detail ]);
+        }
+
+        // var_dump($metas);
+        // exit();
+
+        foreach ($metas as $m) {
+            $meta = [];
+            $tags = $m->sharedTagList;
+
+            if ($m->meta_detail) {
+                $meta['meta'][$m->meta_type][$m->meta_detail] = $m->meta_data;
+            } else {
+                $meta['meta'][$m->meta_type] = $m->meta_data;
+            }
+
+            foreach ($tags as $t) {
+                if ($return_as_bean) {
+                    return $t;
+                } // override
+
+                $meta['tags'][] = $t->export();
+            }
+
+            $result[] = $meta;
+        }
+
+        // var_dump($result);
+
+        return $result;
+    }
+
+    public function tag_by_meta($type=null, $detail=null, $data=null, $return_as_bean=false)
+    {
+        $datas = $this->tags_by_meta($type, $detail, $data);
+
+        $datas = current($datas)['tags']; // only 1 meta
+      $datas = (object) current($datas); // only 1 tag
+
+      return $datas;
+    }
 
     public function tag_by_name_with_parent_id($value, $parent_id)
     {
@@ -221,11 +309,12 @@ class Taxonomy extends App
             $separator = '≫';
         } //default
 
-        if ($_REQUEST['output']=='tree') {
+        $this->output_as = $_REQUEST['output'];
+        $this->output_format = $_REQUEST['format'];
+
+        if ($this->output_as=='tree') {
             $separator = '';
         } //none for non-flat
-
-        $this->output_format = $_REQUEST['format'];
 
         if (!$this->output_format) {
             $this->output_format = 'json';
@@ -233,18 +322,20 @@ class Taxonomy extends App
 
         // TODO: filter by taxonomy_id
 
-        $tag_tree = $this->tag_tree_list($parent_id, $separator, $limit_depth);
-        // echo '<pre>'; print_r($tag_tree); exit();
-
-        if ($_REQUEST['output']=='tree') {
-            $tag_tree = $this->tree_deflatten($tag_tree);
+        if ($this->output_as=='tree') {
+            $tag_tree = $this->tag_tree_list($parent_id, $separator, $limit_depth);
             // echo '<pre>'; print_r($tag_tree); exit();
+
+            $tag_tree = $this->tree_deflatten($tag_tree);
+        // echo '<pre>'; print_r($tag_tree); exit();
+        } else {
+            $tag_tree = $this->tag_by_id($parent_id);
         }
 
         return ($tag_tree);
     }
 
-    public function taxonomy_ouput($parent_id = 1, $taxonomy_id = false, $limit_depth = false, $separator = false)
+    public function taxonomy_output($parent_id = 1, $taxonomy_id = false, $limit_depth = false, $separator = false)
     {
         $tag_tree = $this->taxonomy_get($parent_id, $taxonomy_id, $limit_depth, $separator);
 
