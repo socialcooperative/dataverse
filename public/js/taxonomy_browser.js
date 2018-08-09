@@ -8,9 +8,9 @@ var container_bounds = container.getBoundingClientRect();
 // Dimensions of sunburst.
 var width = container_bounds.width * 0.5;
 var height = width;
-var radius = Math.min(width, height) / 2; 
+var radius = Math.min(width, height) / 2;
 
-// Breadcrumb dimensions: width, height, spacing, width of tip/tail.
+// Breadcrumb dimensions: width, height, spacing, width of tip/tail. 
 var b = {
 	w: container_bounds.width * 0.5,
 	h: 24,
@@ -67,16 +67,16 @@ d3.json(
 	json_url,
 	// "assets/flare.json", // for testing
 	function(error, root) {
-		if(error) console.log(error);
+		if (error) console.log(error);
 		createVisualization(root);
 	}
 );
 
 $.fn.triggerSVGEvent = function(eventName) {
- var event = document.createEvent('SVGEvents');
- event.initEvent(eventName,true,true);
- this[0].dispatchEvent(event);
- return $(this);
+	var event = document.createEvent('SVGEvents');
+	event.initEvent(eventName, true, true);
+	this[0].dispatchEvent(event);
+	return $(this);
 };
 
 // Main function to draw and set up the visualization, once we have the data.
@@ -121,12 +121,12 @@ function createVisualization(json) {
 		.enter().append("svg:path")
 		// .attr("display", function(d) { return d.depth ? null : "none"; })
 		.attr("d", arc)
-//		.attr("id", function(d) {
-//			if (!d.data.link_property || d.data.link_property != 'Related') return d.data.id;
-//		})
-//		.attr("data-id", function(d) {
-//			if(d.data.link_property) return d.data.id;
-//		})
+		//		.attr("id", function(d) {
+		//			if (!d.data.link_property || d.data.link_property != 'Related') return d.data.id;
+		//		})
+		//		.attr("data-id", function(d) {
+		//			if(d.data.link_property) return d.data.id;
+		//		})
 		// .attr("fill-rule", "evenodd")
 		// .style("fill", function(d) { return colors[d.data.name]; })
 		.style("fill", function(d) {
@@ -145,15 +145,15 @@ function createVisualization(json) {
 
 	// ZOOM:
 	function kp_click(d) {
-//		d3.select("#knowledge_center").style("visibility", "hidden");
+		//		d3.select("#knowledge_center").style("visibility", "hidden");
 
 		//		node = d;
 
-		console.log('go',d);
+		console.log('go', d);
 
 		// if(d.depth > 0 && d.height < 2){
 
-			window.location = '?tag_id=' + encodeURIComponent(d.data.id) + '&tag_label='+encodeURIComponent(d.data.name);
+		window.location = '?tag_id=' + encodeURIComponent(d.data.id) + '&tag_label=' + encodeURIComponent(d.data.name);
 
 		// } else {
 		// 	path.transition()
@@ -164,21 +164,21 @@ function createVisualization(json) {
 
 	// path.transition().duration(1000).attrTween("d", arcTweenData);
 
-//	d3.select("#knowledge_center")
-//		.style("top", (radius - (110 / 2)) + 'px')
-//		.style("left", (radius - (140 / 2)) + 'px');
+	//	d3.select("#knowledge_center")
+	//		.style("top", (radius - (110 / 2)) + 'px')
+	//		.style("left", (radius - (140 / 2)) + 'px');
 
 	d3.select("#knowledge_paths")
 		.on("mouseover", function(d) {
-			if(k_activated !=1){
+			if (k_activated != 1) {
 				d3.select("#knowledge_paths").attr('class', 'paths_activated');
 				k_activated = 1;
 			}
 		});
 
-	if(select_id){ // highlight based on URL query
+	if (select_id) { // highlight based on URL query
 		d3.select("#knowledge_paths").attr('class', 'paths_activated');
-		$("#"+select_id).triggerSVGEvent('mouseover');
+		$("#" + select_id).triggerSVGEvent('mouseover');
 	}
 
 };
@@ -206,30 +206,30 @@ function kp_mouseover(d) {
 
 	// console.log(d);
 
-//	if(d.data.id && select_id != d.data.id){
-//		select_id = d.data.id;
-//		selecting_related = false;
-//	} else {
-//		selecting_related = true;
-//	}
+	//	if(d.data.id && select_id != d.data.id){
+	//		select_id = d.data.id;
+	//		selecting_related = false;
+	//	} else {
+	//		selecting_related = true;
+	//	}
 
 	// var percentage = (100 * d.value / totalSize).toPrecision(3);
 	// percentageString = percentage + "%";
 	// if (percentage < 0.1) {
 	//   percentageString = "< 0.1%";
 	// }
-  // console.log(d.data)
-  active_tag_id = d.data.id;
-  active_tag_label = d.data.name;
+	// console.log(d.data)
+	active_tag_id = d.data.id;
+	active_tag_label = d.data.name;
 
-  $('.knowledge_name').empty();
-  $('#tag_meta').empty();
+	$('.knowledge_name').empty();
+	$('#tag_meta').empty();
 
 	var sequenceArray = d.ancestors().reverse();
 	// sequenceArray.shift(); // remove root node from the array
 
 	// Fade all the segments
-	if(!selecting_related) d3.selectAll("path.relevant").attr("class", '');
+	if (!selecting_related) d3.selectAll("path.relevant").attr("class", '');
 
 	// Then highlight only those that are an ancestor of the current segment.
 	vis.selectAll("path")
@@ -238,40 +238,40 @@ function kp_mouseover(d) {
 		})
 		.attr("class", 'relevant');
 
-	if(!selecting_related) updateBreadcrumbs(sequenceArray);
+	if (!selecting_related) updateBreadcrumbs(sequenceArray);
 
-  // load and display meta data
-  $.getJSON( "/taxonomy/tag/"+active_tag_id+"?output=meta&format=json", function( data ) {
-    var items = [];
+	// load and display meta data
+	$.getJSON("/taxonomy/tag/" + active_tag_id + "?output=meta&format=json", function(data) {
+		var items = [];
 
-    $.each( data.meta, function( key, val ) {
-      if(typeof val === 'object'){
-        $.each( val, function( key2, val2 ) {
-          items.push( "<li class='meta-" + key + "'>" + key + " (" + key2 + "): " + val2 + "</li>" );
-        });
-      } else {
-        items.push( "<li class='meta-" + key + "'>" + key + ": " + val + "</li>" );
-      }
-    });
-
-
-    $('#tag_meta').empty();
-    $( "<ul/>", {
-      "class": "meta-list",
-      html: items.join( "" )
-    }).appendTo( "#tag_meta" );
-
-  });
+		$.each(data.meta, function(key, val) {
+			if (typeof val === 'object') {
+				$.each(val, function(key2, val2) {
+					items.push("<li class='meta-" + key + "'>" + key + " (" + key2 + "): " + val2 + "</li>");
+				});
+			} else {
+				items.push("<li class='meta-" + key + "'>" + key + ": " + val + "</li>");
+			}
+		});
 
 
-//	if(!selecting_related && select_id){
-//		var related = $("#knowledge_paths").find("[data-id='" + select_id + "']");
-//		// console.log(related)
-//		if(related && related.length) related.each(function(){
-//			selecting_related = true;
-//			$(this).triggerSVGEvent('mouseover');
-//		});
-//	}
+		$('#tag_meta').empty();
+		$("<ul/>", {
+			"class": "meta-list",
+			html: items.join("")
+		}).appendTo("#tag_meta");
+
+	});
+
+
+	//	if(!selecting_related && select_id){
+	//		var related = $("#knowledge_paths").find("[data-id='" + select_id + "']");
+	//		// console.log(related)
+	//		if(related && related.length) related.each(function(){
+	//			selecting_related = true;
+	//			$(this).triggerSVGEvent('mouseover');
+	//		});
+	//	}
 
 	// d3.select("#knowledge_percentage").text(percentageString);
 
@@ -302,7 +302,7 @@ function breadcrumbPoints(d, i) {
 	//console.log(breadcrumbs_num, i)
 	var w = b.w - 10;
 	var h = b.h;
-//	var h = (breadcrumbs_num == i + 1 ? b.h + 2 : b.h);
+	//	var h = (breadcrumbs_num == i + 1 ? b.h + 2 : b.h);
 	var points = [];
 	points.push("0,0");
 	points.push(w + ",0");
@@ -319,7 +319,7 @@ function breadcrumbData(d, i) {
 
 	if (breadcrumbs_num == i + 1) k_name = d.data.name; // final crumb
 
-// 	if (d.data.link_property == 'Related') k_name = 'Related to: '+k_name;
+	// 	if (d.data.link_property == 'Related') k_name = 'Related to: '+k_name;
 
 	if (d.data.description) {
 		k_description = d.data.description;
@@ -353,9 +353,9 @@ function updateBreadcrumbs(nodeArray) {
 
 	entering.append("a")
 		.attr("xlink:href", function(d) {
-			return '?tag_id=' + encodeURIComponent(d.data.id) + '&tag_label='+encodeURIComponent(d.data.name);
+			return '?tag_id=' + encodeURIComponent(d.data.id) + '&tag_label=' + encodeURIComponent(d.data.name);
 		})
-//		.attr("target", '_blank')
+		//		.attr("target", '_blank')
 		.append("svg:text")
 		.attr("x", 18)
 		.attr("y", b.h / 2)
@@ -364,9 +364,9 @@ function updateBreadcrumbs(nodeArray) {
 		.attr("clip-path", "url(#clip_legend)")
 		.attr("dy", "0.35em")
 		.attr("text-anchor", "left")
-//		.attr("class", function(d, i) {
-//			if (breadcrumbs_num == i + 1) return 'endlabel';
-//		})
+		//		.attr("class", function(d, i) {
+		//			if (breadcrumbs_num == i + 1) return 'endlabel';
+		//		})
 		.text(breadcrumbData);
 
 	// Set position for entering and updating nodes.
@@ -395,8 +395,8 @@ function updateBreadcrumbs(nodeArray) {
 	//  d3.select("#knowledge_trail")
 	//      .style("visibility", "");
 
-	 d3.select("#knowledge_content")
-	 		.style("visibility", "");
+	d3.select("#knowledge_content")
+		.style("visibility", "");
 
 }
 
