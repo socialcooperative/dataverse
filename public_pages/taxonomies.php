@@ -7,7 +7,7 @@
 
 </head>
 
-<body>
+<body> 
 
 	<h3><?=($taxonomy_name ? $taxonomy_name : 'Commons')?> Taxonomy <?=($_GET['tag_label'] ? ' > '.$_GET['tag_label'] : '')?></h3>
 
