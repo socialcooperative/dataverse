@@ -424,7 +424,7 @@ class Form extends Frontend
                 $form_builder->add($this->field_name, CurrencyType::class, $this->field_params([
                     'placeholder' => 'Select a currency',
                     'data'	  => $this->currency,
-                    'choices'	  => $choices,
+                    'preferred_choices'	  => $choices,
                   ]));
 
                 break;
