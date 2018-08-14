@@ -340,5 +340,8 @@
     },
     "wikibase/data-model-services": {
         "version": "3.6.0"
+    },
+    "wikimedia/assert": {
+        "version": "v0.2.2"
     }
 }
