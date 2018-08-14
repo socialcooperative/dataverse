@@ -419,13 +419,24 @@ class Form extends Frontend
 
                 if ($this->field_value) {
                     $this->currency = $this->field_value;
-                }
+				}
+				
+				if(count($choices)){ // manual list of currencies
 
-                $form_builder->add($this->field_name, CurrencyType::class, $this->field_params([
-                    'placeholder' => 'Select a currency',
-                    'data'	  => $this->currency,
-                    'preferred_choices'	  => $choices,
-                  ]));
+					$form_builder->add($this->field_name, ChoiceType::class, $this->field_params([
+						'placeholder' => 'Select a currency',
+						'data'	  => $this->currency,
+						'choices'	  => $choices,
+					  ]));
+
+				} else {
+					$form_builder->add($this->field_name, CurrencyType::class, $this->field_params([
+						'placeholder' => 'Select a currency',
+						'data'	  => $this->currency,
+						// 'preferred_choices'	  => $choices,
+					  ]));
+				}
+                
 
                 break;
             case "Price":
