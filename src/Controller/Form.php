@@ -253,9 +253,9 @@ class Form extends Frontend
 
             $this->field_value = $prev_response ? $prev_response : $this->question->question_default_answer;
 
-            if($this->question->answer_type=='Email' && !$this->field_value){
-
-              $this->field_value = $this->session->get('respondent_email');
+            if(!$this->field_value){ // pre-set an answer
+              if($_REQUEST[$this->field_name]) $this->field_value = $_REQUEST[$this->field_name];
+              elseif($this->question->answer_type=='Email') $this->field_value = $this->session->get('respondent_email');
             }
 
             $this->field_params = [];
@@ -555,7 +555,9 @@ class Form extends Frontend
 
                 $this->output_after .= $this->get_include('templates/form/likert.html');
 
-                $form_builder->add($this->field_name, HiddenType::class, $this->field_params([]));
+                $this->attr['style'] .= 'display:none;';
+
+                $form_builder->add($this->field_name, TextType::class, $this->field_params([]));
 
                 break;
             case "UploadImage":
@@ -579,9 +581,7 @@ class Form extends Frontend
 
                 $this->attr['style'] .= 'display:none;';
 
-                preg_match('/([0-9.-]+).+?([0-9.-]+)/', $this->field_value, $matches);
-                $lat=(float)$matches[1];
-                $long=(float)$matches[2];
+                list($lat, $long) = $this->geo_point_to_array($this->field_value);
 
                 $this->custom_scripts .= "<script>
 				var loc_field = '#form_$this->field_name';
@@ -648,14 +648,51 @@ class Form extends Frontend
 
                 $this->attr['class'] .= ' form_tag';
 
-//                $this->output_before = "<a href='/needs' class='btn btn-info'>Browse the Needs/Offers Taxonomy</a>";
+                $choices = [];
+                if($this->field_value){ // pre-set
+                  $preset_tag_label = $_REQUEST[$this->field_name.'_label'] ? $_REQUEST[$this->field_name.'_label'] : $this->field_value;
+                  $choices[$preset_tag_label] = $this->field_value;
+                }
+
+                $this->attr['data-placeholder'] = 'Enter options as tags, seperated by commas';
+
+                $params = $this->field_params([
+                    //'choice_value' => '',
+                    'placeholder' => $this->attr['data-placeholder'],
+                    'multiple' => true,
+                    'choices' => $choices,
+                ]);
+
+                $form_builder->add($this->field_name, ChoiceType::class, $params);
+
+                $form_builder->get($this->field_name)->resetViewTransformers();
+
+                break;
+
+            case "TaxonomyTag":
+
+                $this->attr['class'] .= ' form_taxonomy_tag';
+
                 $this->output_before .= $this->get_include('templates/form/tag_modal.html');
 
-                $form_builder->add($this->field_name, ChoiceType::class, $this->field_params([
+                $choices = [];
+                if($this->field_value){ // pre-set
+                  $preset_tag_label = $_REQUEST[$this->field_name.'_label'] ? $_REQUEST[$this->field_name.'_label'] : $this->field_value;
+                  $choices[$preset_tag_label] = $this->field_value;
+                }
+
+                $this->attr['data-placeholder'] = 'Start typing your tags & select from the suggestions';
+
+                $params = $this->field_params([
                     //'choice_value' => '',
-                    'placeholder' => 'Select a tag',
+                    'placeholder' => $this->attr['data-placeholder'],
                     'multiple' => true,
-                ]));
+                    'choices' => $choices,
+                ]);
+
+                $form_builder->add($this->field_name, ChoiceType::class, $params);
+
+                $form_builder->get($this->field_name)->resetViewTransformers();
 
                 break;
             default:

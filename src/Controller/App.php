@@ -9,7 +9,7 @@ use RedBeanPHP\R;
 
 class App extends Controller
 {
-    public function __construct(LoggerInterface $logger, SessionInterface $session)
+    public function __construct(LoggerInterface $logger=null, SessionInterface $session=null)
     {
 
             // parent::__construct();
@@ -22,12 +22,12 @@ class App extends Controller
             $bv = new class {
             };
         }
-        $bv->base_path = $base_path = dirname(dirname(dirname(__FILE__))).'/';
+        $this->base_path = $base_path = dirname(dirname(dirname(__FILE__))).'/';
 
-        if (file_exists($bv->base_path.'custom/secrets.php')) {
-            include_once($bv->base_path.'custom/secrets.php');
+        if (file_exists($this->base_path.'custom/secrets.php')) {
+            include_once($this->base_path.'custom/secrets.php');
         } else {
-            include_once($bv->base_path.'config/secrets.php');
+            include_once($this->base_path.'config/secrets.php');
         }
 
         // include_once($this->conf->base_path.'src/misc.php');
@@ -35,17 +35,23 @@ class App extends Controller
         $this->conf = $bv->config;
         $this->conf->base_path = $base_path;
 
-        if ($this->conf->db_type=='mysql') {
-            R::setup('mysql:host='.$this->conf->dbcreds['host'].';dbname='.$this->conf->db_name, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
-        } elseif ($this->conf->db_type=='postgres') { //postgresql
-            R::setup('pgsql:host='.$this->conf->dbcreds['host'].';dbname='.$this->conf->db_name, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
-        } else { // fallback to sqlite
-            if (!$this->conf->db_path) {
-                $this->conf->db_path = 'custom/db.txt';
-            }
-            R::setup('sqlite:'.$this->conf->base_path.$this->conf->db_path, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
-        } //sqlite
+        if (!isset($bv->db_should_be_connected)) {
+            if ($this->conf->db_type=='mysql') {
+                R::setup('mysql:host='.$this->conf->dbcreds['host'].';dbname='.$this->conf->db_name, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
+            } elseif ($this->conf->db_type=='postgres') { //postgresql
 
+                R::setup('pgsql:host='.$this->conf->dbcreds['host'].';dbname='.$this->conf->db_name, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
+            } else { // fallback to sqlite
+
+                if (!$this->conf->db_path) {
+                    $this->conf->db_path = 'custom/db.txt';
+                }
+
+                R::setup('sqlite:'.$this->conf->base_path.$this->conf->db_path, $this->conf->dbcreds['user'], $this->conf->dbcreds['pass']);
+            }
+        }
+
+        $bv->db_should_be_connected = true;
 
         $this->db_tables = new class {
         };
@@ -54,10 +60,10 @@ class App extends Controller
         $this->db_tables->answer = 'answer';
         $this->col_prefix = "the";
 
-        if (!$this->conf->question_id_username) {
+        if (!isset($this->conf->question_id_username)) {
             $this->conf->question_id_username = 34;
         }
-        if (!$this->conf->question_id_username) {
+        if (!isset($this->conf->question_id_username)) {
             $this->conf->question_id_name = 33;
         }
 
@@ -69,7 +75,8 @@ class App extends Controller
                 'Dropdown'=>'Choice from a dropdown',
                 'MultipleChoices'=>'Multiple choices from a list',
                 'DropdownMultiple'=>'Multiple choices from a dropdown',
-                'Tag'=>'Tag (free input, or choice from a list of previous answers)',
+                'Tag'=>'Tag (free input of multiple options)',
+                'TaxonomyTag'=>'Taxonomy Tag (one or multiple choices from a taxonomy, or free input)',
                 'Email'=>'Email address',
                 'Phone'=>'Phone number',
                 'URL'=>'Webpage / URL',
@@ -96,6 +103,13 @@ class App extends Controller
             ];
     }
 
+    public function log_info($label, $data)
+    {
+        if ($this->logger) {
+            return $this->logger->info($label, $data);
+        }
+    }
+
     public function DateTime()
     {
         return R::isoDateTime();
@@ -104,7 +118,7 @@ class App extends Controller
     public function get_include($file)
     {
         ob_start();
-        include($this->conf->base_path.$file);
+        include_once($this->conf->base_path.$file);
         return ob_get_clean();
     }
 
@@ -127,61 +141,64 @@ class App extends Controller
     { // save object in DB, with support for many to many for items with array of data
 
 
-        $this->logger->info('item_save', [$table_name, $data]);
+        $this->log_info('item_save', [$table_name, $data]);
 
-        if (!$this->item) {
+        if (!isset($this->item) || !$this->item) {
             $this->item = R::dispense($table_name);
         }
 
-         if(!is_array($data)) $data = (array) $data; // make sure we are dealing with an array
-        //$this->logger->info('item_save()', $data);
+        if (!is_array($data)) {
+            $data = (array) $data;
+        } // make sure we are dealing with an array
+        //$this->log_info('item_save()', $data);
 
         foreach ($data as $key => $value) {
             // var_dump('item foreach', $key , $value, is_array($value), count($value));
 
-            if (is_array($value)) { // multiple items - use linked table
+            if (is_array($value) && count($value)>0) { // multiple items - use linked table
 
-                if (count($value)>0) {
+                if (isset($custom_linked_table[$key]) && $custom_linked_table[$key]) {
+                    $linked_ref = 'shared'.ucwords($custom_linked_table[$key]).'List';
+                } elseif ($key==$table_name) {
+                    $linked_ref = 'own'.ucwords($key).'List';
+                } // self-referential
+                else {
+                    $linked_ref = 'shared'.ucwords($key).'List';
+                } // many-to-many
 
-                    if($custom_linked_table[$key]) $linked_ref = 'shared'.ucwords($custom_linked_table[$key]).'List';
-                    elseif($key==$table_name) $linked_ref = 'own'.ucwords($key).'List'; // self-referential
-                    else $linked_ref = 'shared'.ucwords($key).'List'; // many-to-many
+                if ((is_object($value) && $value->id)
+               || (is_array($value) && is_object(current($value)) && current($value)->id)) { // we're already being passed an array of Redbean objects
 
-                    if ($value->id || current($value)->id) { // we're already being passed an array of Redbean objects
+                    $this->item->{$linked_ref} = $value; // store relation
+                } else { // create linked entries for each of the array of values
 
-                        $this->item->{$linked_ref} = $value; // store relation
-
-                    } else { // create linked entries for each of the array of values
-
-                        foreach ($value as $linked_value) { // sub-array
-                            if ($linked_value) {
+                  foreach ($value as $linked_value) { // sub-array
+                      if ($linked_value) {
 
 //                                $linked_item = R::dispense($key); // init linked table
 
-                                if (is_array($linked_value)) { // multiple cols
+                          if (is_array($linked_value)) { // multiple cols
 
-                                	foreach ($linked_value as $linked_col =>$linked_col_val) {
+                              foreach ($linked_value as $linked_col =>$linked_col_val) {
 
 //                                		$linked_item->$linked_col = $linked_col_val;
-                                		$linked_data[$linked_col] = $linked_col_val;
-                                	}
+                                  $linked_data[$linked_col] = $linked_col_val;
+                              }
+                          } else { // single val
 
-                                } else { // single val
-
-                                	$label_field = $custom_linked_labels[$key] ? $custom_linked_labels[$key] : $key; // name of column
+                              $label_field = $custom_linked_labels[$key] ? $custom_linked_labels[$key] : $key; // name of column
 
 //                                	$linked_item->$label_field = $linked_value;
-                                	$linked_data[$label_field] = $linked_value;
-                                }
+                              $linked_data[$label_field] = $linked_value;
+                          }
 
 //                                R::store($linked_item);
 
-								$linked_item = R::findOrCreate( $key, $linked_data );
+                          $linked_item = R::findOrCreate($key, $linked_data);
 
-                                $this->item->{$linked_ref}[] = $linked_item; // store relation
-                            }
-                        }
-                    }
+                          $this->item->{$linked_ref}[] = $linked_item; // store relation
+                      }
+                  }
                 }
             } else {
                 $this->item->$key = $value;
@@ -248,26 +265,30 @@ class App extends Controller
         return $this->admin_auth($blocking, 'members_token');
     }
 
+    public function questionnaire_auth($questionnaire_id, $blocking = true)
+    {
+        return $this->admin_auth($blocking, 'token_questionnaire_'.$questionnaire_id);
+    }
+
     public function email_send($msg, $to, $subject=false)
     {
         global $bv;
 
         try {
 
-			# Instantiate the client.
-			$mgClient = new Mailgun($this->conf->mail->mailgun_key);
+            # Instantiate the client.
+            $mgClient = new Mailgun($this->conf->mail->mailgun_key);
 
-			# Make the call to the client.
-			return $mgClient->sendMessage(
-			$this->conf->mail->domain,
-				  array('from'	=> $this->conf->mail->from,
-						'to'	  => $to,
-						'subject' => $subject ? $subject : $this->conf->mail->subject_default,
-						'html'	=> $msg)
-			);
-
-    	} catch (\Exception $e) {
-    		return false;
-    	}
+            # Make the call to the client.
+            return $mgClient->sendMessage(
+            $this->conf->mail->domain,
+                  array('from'	=> $this->conf->mail->from,
+                        'to'	  => $to,
+                        'subject' => $subject ? $subject : $this->conf->mail->subject_default,
+                        'html'	=> $msg)
+            );
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }

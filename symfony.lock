@@ -1,6 +1,39 @@
 {
+    "addwiki/mediawiki-api-base": {
+        "version": "2.4.0"
+    },
+    "addwiki/mediawiki-datamodel": {
+        "version": "0.6"
+    },
+    "addwiki/wikibase-api": {
+        "version": "0.7"
+    },
     "clue/stream-filter": {
         "version": "v1.4.0"
+    },
+    "data-values/common": {
+        "version": "0.4.1"
+    },
+    "data-values/data-values": {
+        "version": "1.1.1"
+    },
+    "data-values/geo": {
+        "version": "3.0.0"
+    },
+    "data-values/interfaces": {
+        "version": "0.2.5"
+    },
+    "data-values/number": {
+        "version": "0.10.0"
+    },
+    "data-values/serialization": {
+        "version": "1.2.2"
+    },
+    "data-values/time": {
+        "version": "0.8.6"
+    },
+    "diff/diff": {
+        "version": "2.3.0"
     },
     "doctrine/annotations": {
         "version": "1.0",
@@ -20,11 +53,20 @@
     "doctrine/common": {
         "version": "v2.8.1"
     },
+    "doctrine/event-manager": {
+        "version": "v1.0.0"
+    },
     "doctrine/inflector": {
         "version": "v1.3.0"
     },
     "doctrine/lexer": {
         "version": "v1.0.1"
+    },
+    "doctrine/persistence": {
+        "version": "v1.0.0"
+    },
+    "doctrine/reflection": {
+        "version": "v1.0.0"
     },
     "gabordemooij/redbean": {
         "version": "v5.0"
@@ -113,6 +155,9 @@
             "ref": "aaddfdf43cdecd4cf91f992052d76c2cadc04543"
         }
     },
+    "serialization/serialization": {
+        "version": "3.2.2"
+    },
     "symfony/asset": {
         "version": "v4.0.3"
     },
@@ -200,6 +245,9 @@
     "symfony/options-resolver": {
         "version": "v4.0.3"
     },
+    "symfony/polyfill-ctype": {
+        "version": "v1.9.0"
+    },
     "symfony/polyfill-intl-icu": {
         "version": "v1.6.0"
     },
@@ -283,5 +331,14 @@
     },
     "webmozart/assert": {
         "version": "1.2.0"
+    },
+    "wikibase/data-model": {
+        "version": "4.4.0"
+    },
+    "wikibase/data-model-serialization": {
+        "version": "2.7.0"
+    },
+    "wikibase/data-model-services": {
+        "version": "3.6.0"
     }
 }

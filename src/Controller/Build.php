@@ -30,17 +30,28 @@ class Build extends Backend
 {
 
     /**
+    * @Route("/admin/", name="build_admin")
+    */
+    public function build_admin()
+    {
+        return $this->list();
+    }
+
+    /**
     * @Route("/build", name="build_list")
     */
     public function list()
     {
         $this->admin_auth();
 
-        $this->page_title = "Questionnaires";
+        $this->page_title = "Questionnaires Dashboard";
 
         $data = $this->questionnaires();
 
-        return $this->render('build/dash-list.html.twig', array('data' => $data, 'title' => $this->page_title));
+        return $this->render('build/dash-list.html.twig', array(
+          'title' => $this->page_title,
+          'questionnaires_list' => $data
+      ));
     }
 
 

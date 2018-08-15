@@ -1,6 +1,4 @@
 <?php
-// v4.3.1
-
 
 global $bv;
 

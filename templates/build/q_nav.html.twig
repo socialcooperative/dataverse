@@ -1,0 +1,18 @@
+
+<div class="dropdown show pull-right">
+
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+    {% for v in questionnaires_list %}
+        <a class="dropdown-item"  href="{{q_nav_url}}{{ v.id|e }}">
+          {{ v.questionnaire_title|e }}
+        </a>
+        {% if current_id is defined and current_id == v.id %}
+          {% set q_nav_title = v.questionnaire_title %}
+        {% endif %}
+    {% endfor %}
+  </div>
+
+  <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    {{q_nav_title|default('Browse Responses from Questionnaire')|e}}
+  </a>
+</div>

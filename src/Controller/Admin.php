@@ -9,11 +9,26 @@ class Admin extends Backend
 {
 
   /**
-  * @Route("/admin/respondents/{questionnaire_id}/{page}/{sort_by}/{sorting}", name="admin_respondents", requirements={"questionnaire_id"="\d+", "page"="\d+", "sort_by": "[a-zA-Z0-9_]+", "sorting": "asc|desc"})
+  * @Route("/dashboard", name="admin_dash")
   */
+    public function admin_dash()
+    {
+        $questionnaires_list = $this->questionnaires();
+
+        return $this->render('admin/index.html.twig', array(
+          'name' => 'admin',
+          'questionnaires_list' => $questionnaires_list
+      ));
+    }
+
+    /**
+    * @Route("/admin/respondents/{questionnaire_id}/{page}/{sort_by}/{sorting}", name="admin_respondents", requirements={"questionnaire_id"="\d+", "page"="\d+", "sort_by": "[a-zA-Z0-9_]+", "sorting": "asc|desc"})
+    */
     public function admin_respondents($questionnaire_id = 1, $page = 1, $sort_by = 'ts_started', $sorting = 'desc')
     {
         $this->admin_auth();
+
+        $this->questionnaire = $this->questionnaire_get($questionnaire_id);
 
         $people = $this->respondents_browse($questionnaire_id, $page, $sort_by, $sorting);
 
@@ -32,6 +47,8 @@ class Admin extends Backend
             $this->admin_auth(true);
         }
 
+        $this->questionnaire = $this->questionnaire_get($questionnaire_id);
+
         $people = $this->respondents_browse($questionnaire_id, $page, $sort_by, $sorting);
 
         return $this->render('admin/table-members.html.twig', array(
@@ -43,7 +60,6 @@ class Admin extends Backend
 
     public function member_get($u)
     {
-
         $u->username = $this->username_by_respondent_id($u->id);
 
         if (!$u->username) {
@@ -64,7 +80,9 @@ class Admin extends Backend
 
     public function member_update($member, $status = false)
     {
-        if(!$status) $status = $_REQUEST['status'];
+        if (!$status) {
+            $status = $_REQUEST['status'];
+        }
 
         $ret = new class {
         };
@@ -196,48 +214,50 @@ class Admin extends Backend
             exit('respondent not found');
         }
 
-        if($status=='invite'){ // clean up / prepare username
+        if ($status=='invite') { // clean up / prepare username
 
-          $uname = $this->username_by_respondent_id($this->respondent->id);
+            $uname = $this->username_by_respondent_id($this->respondent->id);
 
-          if (!$uname) { // otherwise get name
-              $r = $this->response_by_question_id($this->conf->question_id_name, $this->respondent->id);
-              $uname = $r->the_var ? $r->the_var : $r->answer->answer;
-          }
+            if (!$uname) { // otherwise get name
+                $r = $this->response_by_question_id($this->conf->question_id_name, $this->respondent->id);
+                $uname = $r->the_var ? $r->the_var : $r->answer->answer;
+            }
 
-          if (!$uname) {
-              exit('no username or name found');
-          }
+            if (!$uname) {
+                exit('no username or name found');
+            }
 
-          $uname_ok = $this->sanitize_string($uname);
+            $uname_ok = $this->sanitize_string($uname);
 
-          if (!$uname_ok) {
-              exit('username not valid');
-          }
+            if (!$uname_ok) {
+                exit('username not valid');
+            }
 
-          $this->question = $this->question_get($this->conf->question_id_username); // needed by response_save() for saving sanitized username
-          if (!$this->question) {
-              exit('username field not found in DB');
-          }
+            $this->question = $this->question_get($this->conf->question_id_username); // needed by response_save() for saving sanitized username
+            if (!$this->question) {
+                exit('username field not found in DB');
+            }
 
-          $this->respondent->username = $uname_ok; // save in respondent table
+            $this->respondent->username = $uname_ok; // save in respondent table
 
-          $respond['theVar'] = $uname_ok; // store
-          $response_ids[] = $this->response_save($respond);
+            $respond['theVar'] = $uname_ok; // store
+            $response_ids[] = $this->response_save($respond);
         }
 
         $this->respondent->status = $status;
         R::store($this->respondent);
 
-        if($status=='invite' && ($mu = $this->member_update($this->respondent, $status))){
-
-          if($mu->error) echo($mu->error);
-          else echo("An invitation was sent for an account with username: @".$uname_ok);
-          // print_r($mu);
-          exit();
+        if ($status=='invite' && ($mu = $this->member_update($this->respondent, $status))) {
+            if ($mu->error) {
+                echo($mu->error);
+            } else {
+                echo("An invitation was sent for an account with username: @".$uname_ok);
+            }
+            // print_r($mu);
+            exit();
+        } else {
+            exit("An account is pending to be created with username: @".$uname_ok);
         }
-
-        else exit("An account is pending to be created with username: @".$uname_ok);
     }
 
     public function send_account_email($email, $username, $pw=false)
@@ -249,7 +269,11 @@ class Admin extends Backend
             include_once($custom_member_inc);
         }
 
-        if($pw && $bv->message_welcome_body) return $this->email_send($bv->message_welcome_body, $email, $bv->message_welcome_subject); // deprecate
-        elseif($bv->message_invite_body) return $this->email_send($bv->message_invite_body, $email, $bv->message_invite_subject); // new invite system
+        if ($pw && $bv->message_welcome_body) {
+            return $this->email_send($bv->message_welcome_body, $email, $bv->message_welcome_subject);
+        } // deprecate
+        elseif ($bv->message_invite_body) {
+            return $this->email_send($bv->message_invite_body, $email, $bv->message_invite_subject);
+        } // new invite system
     }
 }

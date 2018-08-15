@@ -73,3 +73,7 @@ textarea, textarea.form-control{
   margin-top: 14px;
   max-width: 400px;
 }
+
+#form .form-check label{
+  margin-bottom: 0;
+}
