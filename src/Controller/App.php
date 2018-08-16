@@ -124,7 +124,7 @@ class App extends Controller
 
     public function data_by_id($table, $id)
     {
-        return R::load($table, $id);
+        return R::load($table, intval($id));
     }
 
     public function get_by_field($table, $field, $value)
