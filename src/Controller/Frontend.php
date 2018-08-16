@@ -341,7 +341,7 @@ class Frontend extends App
 
     public function questionnaire_questions($id)
     {
-        return R::find('question', ' questionnaire_id = ? ORDER BY id ASC ', [ $id ]);
+        return R::find('question', ' questionnaire_id = ? ORDER BY id ASC ', [ intval($id) ]);
     }
 
     public function question_get($id)
@@ -371,14 +371,14 @@ class Frontend extends App
 
     public function data_by_respondent($table, $respondent_id)
     {
-        return R::findOne($table, ' respondent_id = ? ORDER BY response_ts DESC ', [ $respondent_id ]);
+        return R::findOne($table, ' respondent_id = ? ORDER BY response_ts DESC ', [ intval($respondent_id) ]);
     }
 
     public function response_by_question_id($question_id, $respondent_id)
     {
         $geo_col = $this->db_tables->response.'.'.$this->col_prefix.'_'.'point';
         // R::bindFunc('read', $geo_col, 'asText'); // TODO
-        return R::findOne($this->db_tables->response, ' question_id = ? AND respondent_id = ? ORDER BY response_ts DESC ', [ $question_id, $respondent_id ]);
+        return R::findOne($this->db_tables->response, ' question_id = ? AND respondent_id = ? ORDER BY response_ts DESC ', [ intval($question_id), intval($respondent_id) ]);
     }
 
     public function respondents_by_status($status)
@@ -393,22 +393,22 @@ class Frontend extends App
 
     public function questionnaire_steps($id)
     {
-        return R::find('step', 'questionnaire_id = ? ORDER BY step ASC, step_order ASC ', [ $id ]);
+        return R::find('step', 'questionnaire_id = ? ORDER BY step ASC, step_order ASC ', [ intval($id) ]);
     }
 
     public function questionnaire_step($step)
     {
-        return R::find('step', 'questionnaire_id = ? AND step = ? ORDER BY step_order ASC', [$this->questionnaire->id, $step]);
+        return R::find('step', 'questionnaire_id = ? AND step = ? ORDER BY step_order ASC', [ intval($this->questionnaire->id), $step]);
     }
 
     public function questionnaire_next_step($step)
     {
-        return R::findOne('step', 'questionnaire_id = ? AND step > ? LIMIT 1 ', [$this->questionnaire->id, $step]);
+        return R::findOne('step', 'questionnaire_id = ? AND step > ? LIMIT 1 ', [ intval($this->questionnaire->id), $step]);
     }
 
     public function questionnaire_last_step()
     {
-        return R::findOne('step', 'questionnaire_id = ? ORDER BY step DESC, step_order DESC LIMIT 1 ', [$this->questionnaire->id]);
+        return R::findOne('step', 'questionnaire_id = ? ORDER BY step DESC, step_order DESC LIMIT 1 ', [ intval($this->questionnaire->id) ]);
     }
 
     public function step_get($id)
@@ -418,7 +418,7 @@ class Frontend extends App
 
     public function steps_by_question_id($id)
     {
-        return R::find('step', ' question_id = ? ', [ $id ]);
+        return R::find('step', ' question_id = ? ', [ intval($id) ]);
     }
 
     public function username_by_respondent_id($respondent_id)

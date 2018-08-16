@@ -50,7 +50,7 @@ class Taxonomy extends App
                     } else {
                         foreach ($vals as $val) {
                             $add_meta[] = $this->tag_meta_prepare($type, $subtype, $val);
-                            //						$this->tag_meta_add($tag, $type, $subtype, $val);
+                            //$this->tag_meta_add($tag, $type, $subtype, $val);
                         }
                     }
                 }
@@ -60,7 +60,7 @@ class Taxonomy extends App
         }
 
         $tag_id = $this->item_save('tag', $data);
-        //		$tag = $this->item;
+        $this->tag_last_saved = $this->item;
 
         return $tag_id;
     }

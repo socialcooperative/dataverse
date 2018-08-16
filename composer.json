@@ -7,7 +7,6 @@
         "gabordemooij/redbean": "^5.0",
         "guzzlehttp/psr7": "^1.4",
         "knplabs/knp-paginator-bundle": "^2.7",
-        "league/csv": "^9.1",
         "league/oauth2-client": "^2.3",
         "mailgun/mailgun-php": "^2.4",
         "php-http/curl-client": "^1.7",
@@ -24,7 +23,8 @@
         "symfony/yaml": "^4.0"
     },
     "require-dev": {
-        "addwiki/wikibase-api": "^0.7.0",
+        "league/csv": "^9.1",
+        "addwiki/wikibase-api": "dev-master",
         "data-values/common": "~0.3.0|~0.4.0",
         "data-values/geo": "^3.0.0|~0.4.0",
         "data-values/number": "^0.10.0",
